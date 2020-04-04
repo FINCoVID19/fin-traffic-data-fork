@@ -1,8 +1,9 @@
 import requests
 import pandas as pd
+from typing import Dict, Text
 
 
-def list_tms_stations() -> pd.DataFrame:
+def get_tms_stations() -> pd.DataFrame:
     """
     Obtain a list of TMS stations and their properties.
 
@@ -31,9 +32,11 @@ def list_tms_stations() -> pd.DataFrame:
         int(tms['properties']['provinceCode']) for tms in data
     ]
     tms_dir1_municipality_codes = [
-        tms['properties']['direction1MunicipalityCode'] for tms in data ]
+        tms['properties']['direction1MunicipalityCode'] for tms in data
+    ]
     tms_dir2_municipality_codes = [
-        tms['properties']['direction2MunicipalityCode'] for tms in data ]
+        tms['properties']['direction2MunicipalityCode'] for tms in data
+    ]
 
     df = pd.DataFrame({
         'id': tms_ids,
@@ -45,3 +48,45 @@ def list_tms_stations() -> pd.DataFrame:
         'dir2': tms_dir2_municipality_codes
     })
     return df
+
+
+def get_municipalities() -> Dict[int, Text]:
+    """
+    Returns a mapping between municipality id and its name.
+
+    Returns
+    -------
+    Dict
+    """
+    resp = requests.get('https://tie.digitraffic.fi/api/v3/metadata/locations')
+
+    data = resp.json()
+
+    iters = filter(
+        lambda item: item['properties']['subtypeCode'].startswith('A9.'),
+        data['features'])
+    municipality_id_name_map = dict(
+        sorted([(int(it['id']), it['properties']['firstName'])
+                for it in iters]))
+    return municipality_id_name_map
+
+
+def get_provinces() -> Dict[int, Text]:
+    """
+    Returns a mapping between province id and its name.
+
+    Returns
+    -------
+    Dict
+    """
+    resp = requests.get('https://tie.digitraffic.fi/api/v3/metadata/locations')
+
+    data = resp.json()
+
+    iters = filter(
+        lambda item: item['properties']['subtypeCode'].startswith('A8.'),
+        data['features'])
+    province_id_name_map = dict(
+        sorted([(int(it['id']), it['properties']['firstName'])
+                for it in iters]))
+    return province_id_name_map
