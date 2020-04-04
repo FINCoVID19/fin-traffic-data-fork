@@ -48,7 +48,7 @@ def main():
                    key='dataframe')
 
     tms_stations.to_hdf(
-        f'fi_trafi_raw_{args.begin_date}_{args.end_date}.pd.h5',
+        f'fin_traffic_raw_{args.begin_date}_{args.end_date}.pd.h5',
         key='tms_stations')
 
 
