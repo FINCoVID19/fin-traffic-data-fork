@@ -4,3 +4,5 @@ scipy
 matplotlib
 requests
 h5py
+tables
+mypy

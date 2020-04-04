@@ -30,7 +30,9 @@ def main():
     ely_id_name_map = get_ely_centers()
     ely_ids = list(ely_id_name_map.keys())
 
-    bar = progressbar.ProgressBar(max_value=tms_stations.shape[0])
+    bar = progressbar.ProgressBar(max_value=tms_stations.shape[0],
+                                  redirect_stdout=True)
+
     all_dfs = []
     for i, tms_station in tms_stations.iterrows():
         df = get_tms_raw_data(ely_ids, int(tms_station.num), args.begin_date,
@@ -42,9 +44,9 @@ def main():
 
     df_full = pd.concat(all_dfs)
 
-    df_full.to_hdf5('output.pd.h5', key='dataframe')
+    df_full.to_hdf('fi_trafi_raw_{args.begin_date}_{args.end_date}.pd.h5', key='dataframe')
 
-    tms_stations.to_hdf5('output.pd.h5', key='tms_stations')
+    tms_stations.to_hdf('fi_trafi_raw_{args.begin_date}_{args.end_date}.pd.h5', key='tms_stations')
 
 
 if __name__ == '__main__':
