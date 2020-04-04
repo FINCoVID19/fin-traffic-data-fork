@@ -44,9 +44,12 @@ def main():
 
     df_full = pd.concat(all_dfs)
 
-    df_full.to_hdf('fi_trafi_raw_{args.begin_date}_{args.end_date}.pd.h5', key='dataframe')
+    df_full.to_hdf(f'fi_trafi_raw_{args.begin_date}_{args.end_date}.pd.h5',
+                   key='dataframe')
 
-    tms_stations.to_hdf('fi_trafi_raw_{args.begin_date}_{args.end_date}.pd.h5', key='tms_stations')
+    tms_stations.to_hdf(
+        f'fi_trafi_raw_{args.begin_date}_{args.end_date}.pd.h5',
+        key='tms_stations')
 
 
 if __name__ == '__main__':
