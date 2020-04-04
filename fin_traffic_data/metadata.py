@@ -22,7 +22,7 @@ def get_tms_stations() -> pd.DataFrame:
         'https://tie.digitraffic.fi/api/v3/metadata/tms-stations')
     data = resp.json()['features']
 
-    tms_ids = [tms['id'] for tms in data]
+    tms_ids = [int(tms['id']) for tms in data]
     tms_nums = [ tms['properties']['tmsNumber'] for tms in data]
     tms_coords_x = [tms['geometry']['coordinates'][0] for tms in data]
     tms_coords_y = [tms['geometry']['coordinates'][1] for tms in data]

@@ -3,3 +3,4 @@ numpy
 scipy
 matplotlib
 requests
+h5py

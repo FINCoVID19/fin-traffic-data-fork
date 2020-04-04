@@ -66,6 +66,7 @@ def get_tms_raw_data(ely_id_list: List[int],
         - direction
         - vehicle category
 
+    or None if the TMS cannot be found in any ELY center's dataset (likely an old TMS id).
     """
     ely_ids = ["%02d" % eid for eid in ely_id_list]
 
@@ -91,11 +92,12 @@ def get_tms_raw_data(ely_id_list: List[int],
                     if resp.status_code == 200:
                         ely_id = possible_ely_id
                         break
+            if not ely_id:
+                raise RuntimeError("No ELY center has this TMS")
             resp = requests.get(
                 'https://aineistot.vayla.fi/lam/rawdata/' +
                 f'{date.year}/{ely_id}/lamraw_{tms_id}_{year_short}' +
-                f'_{day_number}.csv'
-            )
+                f'_{day_number}.csv')
             if resp.status_code != 200:
                 raise RuntimeError
             stream = StringIO(resp.text)
@@ -111,14 +113,23 @@ def get_tms_raw_data(ely_id_list: List[int],
                                  ]
                              },
                              date_parser=_tms_raw_date_parser)
-            # Remove faulty readings
-            df = df.loc[df['faulty'] == 0][[
-                'tms_id', 'time', 'direction', 'vehicle category'
-            ]]
-            dfs.append(df)
+            # Remove faulty readings and empty datasets
+            if 'time' in df.columns:
+                df = df.loc[df['faulty'] == 0][[
+                    'tms_id', 'time', 'direction', 'vehicle category'
+                ]]
+                dfs.append(df)
         except RuntimeError as e:
-            print(f"Could not load {date}")
+            print(f"Could not load {tms_id}, {date}")
+            if not ely_id:
+                return None
+        except Exception as e:
+            import pdb; pdb.set_trace()
+            print("Unknown error")
         finally:
             if show_progress:
                 bar.update(i)
-    return pd.concat(dfs)
+    if dfs:
+        return pd.concat(dfs)
+    else:
+        return None
