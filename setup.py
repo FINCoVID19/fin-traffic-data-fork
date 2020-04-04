@@ -50,7 +50,12 @@ setup(
         'mypy': MypyCommand,
     },
     data_files=[],
-    description="Fetching and aggregating traffic data from Finnish roads",
+    description="Fetching and aggregation of traffic data from Finnish roads",
+    entry_points = {
+        'console_scripts': [
+            'fi-traffic-fetch-raw-data = fin_traffic_data.scripts.fetch_raw_data:main'
+        ]
+    },
     install_requires=get_requirements(),
     license=my_pkg.__license__,
     long_description=read('README.rst'),
