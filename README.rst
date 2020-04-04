@@ -13,6 +13,7 @@ Installation
 ------------
 
 ::
+
     pip3 install fin-traffic-data
 
 Fetching raw traffic data
