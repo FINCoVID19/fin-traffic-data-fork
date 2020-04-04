@@ -23,6 +23,7 @@ def get_tms_stations() -> pd.DataFrame:
     data = resp.json()['features']
 
     tms_ids = [tms['id'] for tms in data]
+    tms_nums = [ tms['properties']['tmsNumber'] for tms in data]
     tms_coords_x = [tms['geometry']['coordinates'][0] for tms in data]
     tms_coords_y = [tms['geometry']['coordinates'][1] for tms in data]
     tms_municipality_codes = [
@@ -40,6 +41,7 @@ def get_tms_stations() -> pd.DataFrame:
 
     df = pd.DataFrame({
         'id': tms_ids,
+        'num': tms_nums,
         'coords_x': tms_coords_x,
         'coords_y': tms_coords_y,
         'municipality': tms_municipality_codes,
@@ -90,3 +92,16 @@ def get_provinces() -> Dict[int, Text]:
         sorted([(int(it['id']), it['properties']['firstName'])
                 for it in iters]))
     return province_id_name_map
+
+def get_ely_centers() -> Dict[int, Text]:
+    return {
+        1: "Uusimaa, Häme",
+        2: "Varsinais-Suomi, Satakunta",
+        3: "Kaakkois-Suomi",
+        4: "Pirkanmaa",
+        8: "Pohjois-Savo, Etelä-Savo, Pohjois-Karjala",
+        9: "Keski-Suomi",
+        10: "Etelä-Pohjanmaa, Pohjanmaa",
+        12: "Pohjois-Pohjanmaa, Kainuu",
+        14: "Lappi"
+    }
