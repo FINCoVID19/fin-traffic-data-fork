@@ -53,7 +53,7 @@ setup(
     description="Fetching and aggregation of traffic data from Finnish roads",
     entry_points = {
         'console_scripts': [
-            'fi-traffic-fetch-raw-data = fin_traffic_data.scripts.fetch_raw_data:main'
+            'fin-traffic-fetch-raw-data = fin_traffic_data.scripts.fetch_raw_data:main'
         ]
     },
     install_requires=get_requirements(),
