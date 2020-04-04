@@ -44,12 +44,10 @@ def main():
 
     df_full = pd.concat(all_dfs)
 
-    df_full.to_hdf(f'fi_trafi_raw_{args.begin_date}_{args.end_date}.pd.h5',
-                   key='dataframe')
-
-    tms_stations.to_hdf(
-        f'fin_traffic_raw_{args.begin_date}_{args.end_date}.pd.h5',
-        key='tms_stations')
+    df_full.to_pickle(
+        path = f'fin_traffic_raw_{args.begin_date}_{args.end_date}.pkl.bz2',
+        compression='bz2',
+        protocol=4)
 
 
 if __name__ == '__main__':
