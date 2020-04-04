@@ -20,7 +20,7 @@ def _tms_raw_date_parser(*args) -> np.ndarray:
     """Datetime parser for TMS raw data"""
     years, days, hours, minutes, seconds, milliseconds = args
     years = years.astype(int) + 2000
-    days = days.astype(int)
+    days = days.astype(int)-1
     hours = hours.astype(int)
     minutes = minutes.astype(int)
     seconds = seconds.astype(int)
