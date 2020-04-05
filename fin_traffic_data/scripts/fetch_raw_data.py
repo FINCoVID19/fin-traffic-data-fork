@@ -33,21 +33,20 @@ def main():
     bar = progressbar.ProgressBar(max_value=tms_stations.shape[0],
                                   redirect_stdout=True)
 
-    all_dfs = []
     for i, tms_station in tms_stations.iterrows():
         df = get_tms_raw_data(ely_ids, int(tms_station.num), args.begin_date,
                               args.end_date, False)
         if df is not None:
-            all_dfs.append(df)
+            df.to_hdf(
+                f'fin_traffic_raw_{args.begin_date}_{args.end_date}.h5',
+                key = f"tms_{int(tms_station.num)}/",
+                complevel=9,
+                format='table',
+                nan_rep='None')
+
 
         bar.update(i)
 
-    df_full = pd.concat(all_dfs)
-
-    df_full.to_pickle(
-        path = f'fin_traffic_raw_{args.begin_date}_{args.end_date}.pkl.bz2',
-        compression='bz2',
-        protocol=4)
 
 
 if __name__ == '__main__':
