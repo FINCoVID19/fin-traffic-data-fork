@@ -124,8 +124,7 @@ def get_tms_raw_data(ely_id_list: List[int],
             if not ely_id:
                 return None
         except Exception as e:
-            import pdb; pdb.set_trace()
-            print("Unknown error")
+            print(f"Unknown error {e}")
         finally:
             if show_progress:
                 bar.update(i)
