@@ -123,7 +123,7 @@ def _aggregate_single_timeinterval(tms_num, t_begin, t_end, delta_t, df,
         raise RuntimeError()
     else:  # Next file needed
         df, file_Tbegin, file_Tend = next(rawdata_iterator)
-        res = _aggregate_single_timeinterval(tms_num, t_begin, t_end, delta_t,
+        res, file_Tbegin, file_Tend = _aggregate_single_timeinterval(tms_num, t_begin, t_end, delta_t,
                                             df, file_Tbegin, file_Tend,
                                             rawdata_iterator)
     return res, file_Tbegin, file_Tend
