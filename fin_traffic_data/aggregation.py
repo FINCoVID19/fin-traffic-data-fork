@@ -98,7 +98,7 @@ _keys_default = np.array(
 
 
 def _aggregate_single_timeinterval(tms_num, t_begin, t_end, delta_t, df,
-                                   file_Tbegin, file_Tend, rawfile_iterator):
+                                   file_Tbegin, file_Tend, rawdata_iterator):
     tb_in_file = file_Tbegin <= t_begin < file_Tend
     te_in_file = file_Tbegin <= t_end <= file_Tend
     if tb_in_file and te_in_file:  # The time interval is in the file
@@ -123,10 +123,10 @@ def _aggregate_single_timeinterval(tms_num, t_begin, t_end, delta_t, df,
         raise RuntimeError()
     else:  # Next file needed
         df, file_Tbegin, file_Tend = next(rawdata_iterator)
-        res = aggregate_single_timeinterval(tms_num, t_begin, t_end, delta_t,
+        res = _aggregate_single_timeinterval(tms_num, t_begin, t_end, delta_t,
                                             df, file_Tbegin, file_Tend,
                                             rawdata_iterator)
-    return res
+    return res, file_Tbegin, file_Tend
 
 
 def _aggregate_core(tms_num, t_begin, t_end, delta_t,
@@ -144,10 +144,12 @@ def _aggregate_core(tms_num, t_begin, t_end, delta_t,
     except StopIteration:
         return None  # TODO: Replace by zeroed aggregate dataframe
     for tb, te in timespans:
-        tms_aggregated_dfs.append(
-            _aggregate_single_timeinterval(tms_num, tb, te, delta_t, df,
+        _tmp_df, file_Tbegin, file_Tend = _aggregate_single_timeinterval(tms_num, tb, te, delta_t, df,
                                            file_Tbegin, file_Tend,
-                                           rawdata_iterator))
+                                           rawdata_iterator)
+        tms_aggregated_dfs.append(
+            _tmp_df
+            )
     return pd.concat(tms_aggregated_dfs)
 
 def aggregate_datafiles(
