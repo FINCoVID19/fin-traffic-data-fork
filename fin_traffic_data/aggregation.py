@@ -131,7 +131,7 @@ def _aggregate_single_timeinterval(tms_num, t_begin, t_end, delta_t, df,
 
 
 def _aggregate_core(tms_num, t_begin, t_end, delta_t,
-                    raw_data_files) -> pd.DataFrame:
+                    raw_data_files, lock) -> pd.DataFrame:
 
     # Iterator for the dataframes containing raw data for this particular
     # measuring station
@@ -151,14 +151,15 @@ def _aggregate_core(tms_num, t_begin, t_end, delta_t,
             _tmp_df
             )
     tms_df = pd.concat(tms_aggregated_dfs)
+    with lock:
+        tms_df.to_hdf(
+            f'aggregated_data/fin-traffic-{delta_t}-{t_begin}-{t_end}.h5',
+            key=f'tms_{tms_num}',
+            complevel=9,
+            format='table',
+            nan_rep='None'
+        )
 
-    tms_df.to_hdf(
-        f'aggregated_data/fin-traffic-{delta_t}-{t_begin}-{t_end}.h5',
-        key=f'tms_{tms_num}',
-        complevel=9,
-        format='table',
-        nan_rep='None'
-    )
 class Engine:
 
     def __init__(self, time0, time_end, delta_t,
@@ -167,10 +168,10 @@ class Engine:
         self.time_end = time_end
         self.delta_t = delta_t
         self.raw_data_files = raw_data_files
-
+        self.lock = multiprocessing.Lock()
     def __call__(self, tms_num):
         _aggregate_core(tms_num, self.time0, self.time_end, self.delta_t,
-                             self.raw_data_files)
+                             self.raw_data_files, self.lock)
 
 def aggregate_datafiles(
         raw_data_files: List[Tuple[Text, datetime.date, datetime.date]],
