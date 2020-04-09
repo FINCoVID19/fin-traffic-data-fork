@@ -131,7 +131,7 @@ def _aggregate_single_timeinterval(tms_num, t_begin, t_end, delta_t, df,
 
 
 def _aggregate_core(tms_num, t_begin, t_end, delta_t,
-                    raw_data_files, lock) -> pd.DataFrame:
+                    raw_data_files) -> pd.DataFrame:
 
     # Iterator for the dataframes containing raw data for this particular
     # measuring station
@@ -168,10 +168,13 @@ class Engine:
         self.time_end = time_end
         self.delta_t = delta_t
         self.raw_data_files = raw_data_files
-        self.lock = multiprocessing.Lock()
     def __call__(self, tms_num):
         _aggregate_core(tms_num, self.time0, self.time_end, self.delta_t,
-                             self.raw_data_files, self.lock)
+                             self.raw_data_files)
+
+def init(l):
+    global lock
+    lock = l
 
 def aggregate_datafiles(
         raw_data_files: List[Tuple[Text, datetime.date, datetime.date]],
@@ -195,7 +198,8 @@ def aggregate_datafiles(
     time = time0
 
     # Iterate over TMSs
-    pool = multiprocessing.Pool()
+    lock = multiprocessing.Lock()
+    pool = multiprocessing.Pool(initializer=init, initargs=(lock,))
     engine = Engine(time0, time_end, delta_t, raw_data_files)
     for _ in tqdm.tqdm(pool.imap(engine, all_tms_numbers)):
         pass
