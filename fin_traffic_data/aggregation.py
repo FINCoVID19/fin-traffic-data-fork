@@ -2,14 +2,15 @@ import argparse
 import datetime
 from functools import reduce
 from glob import glob
-
 import itertools
+import multiprocessing
 import re
 from typing import List, Text, Tuple
 
 import pandas as pd
 import numpy as np
 import progressbar
+import tqdm
 
 from fin_traffic_data.utils import *
 
@@ -88,7 +89,6 @@ def _tms_rawdata_dataframe_iterator(tms_num, raw_data_files):
                                              day=fileinfo[2].day)
             yield (df, datetime_begin, datetime_end)
         except Exception as e:
-            print(e)
             ...
 
 
@@ -150,13 +150,32 @@ def _aggregate_core(tms_num, t_begin, t_end, delta_t,
         tms_aggregated_dfs.append(
             _tmp_df
             )
-    return pd.concat(tms_aggregated_dfs)
+    tms_df = pd.concat(tms_aggregated_dfs)
+
+    tms_df.to_hdf(
+        f'aggregated_data/fin-traffic-{delta_t}-{t_begin}-{t_end}.h5',
+        key=f'tms_{tms_num}',
+        complevel=9,
+        format='table',
+        nan_rep='None'
+    )
+class Engine:
+
+    def __init__(self, time0, time_end, delta_t,
+                 raw_data_files):
+        self.time0 = time0
+        self.time_end = time_end
+        self.delta_t = delta_t
+        self.raw_data_files = raw_data_files
+
+    def __call__(self, tms_num):
+        _aggregate_core(tms_num, self.time0, self.time_end, self.delta_t,
+                             self.raw_data_files)
 
 def aggregate_datafiles(
         raw_data_files: List[Tuple[Text, datetime.date, datetime.date]],
         all_tms_numbers: List[int],
         delta_t: datetime.timedelta) -> pd.DataFrame:
-    print(raw_data_files)
     first_date = min(raw_data_files, key=lambda f: f[1])[1]
     last_date = max(raw_data_files, key=lambda f: f[2])[2]
 
@@ -175,14 +194,7 @@ def aggregate_datafiles(
     time = time0
 
     # Iterate over TMSs
-    for tms_num in progressbar.progressbar(all_tms_numbers):
-        tms_df = _aggregate_core(tms_num, time0, time_end, delta_t,
-                                 raw_data_files)
-        if tms_df is not None:
-            tms_df.to_hdf(
-                f'aggregated_data/fin-traffic-{delta_t}-{time0}-{time_end}.h5',
-                key=f'tms_{tms_num}',
-                complevel=9,
-                format='table',
-                nan_rep='None'
-            )
+    pool = multiprocessing.Pool()
+    engine = Engine(time0, time_end, delta_t, raw_data_files)
+    for _ in tqdm.tqdm(pool.imap(engine, all_tms_numbers)):
+        pass
