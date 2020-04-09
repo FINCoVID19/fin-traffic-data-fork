@@ -1,5 +1,6 @@
 import argparse
 from datetime import date
+import pathlib
 
 import progressbar
 
@@ -32,14 +33,14 @@ def main():
 
     bar = progressbar.ProgressBar(max_value=tms_stations.shape[0],
                                   redirect_stdout=True)
-
+    pathlib.Path("raw_data/").mkdir(parents=True, exist_ok=True)
     for i, tms_station in tms_stations.iterrows():
         df = get_tms_raw_data(ely_ids, int(tms_station.num), args.begin_date,
                               args.end_date, False)
         if df is not None:
             df.to_hdf(
-                f'fin_traffic_raw_{args.begin_date}_{args.end_date}.h5',
-                key = f"tms_{int(tms_station.num)}/",
+                f'raw_data/fin_traffic_raw_{args.begin_date}_{args.end_date}.h5',
+                key = f"tms_{int(tms_station.num)}",
                 complevel=9,
                 format='table',
                 nan_rep='None')
