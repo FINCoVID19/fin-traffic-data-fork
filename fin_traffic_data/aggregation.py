@@ -87,7 +87,8 @@ def _tms_rawdata_dataframe_iterator(tms_num, raw_data_files):
                                              month=fileinfo[2].month,
                                              day=fileinfo[2].day)
             yield (df, datetime_begin, datetime_end)
-        except:
+        except Exception as e:
+            print(e)
             ...
 
 
@@ -135,7 +136,6 @@ def _aggregate_core(tms_num, t_begin, t_end, delta_t,
     # Iterator for the dataframes containing raw data for this particular
     # measuring station
     rawdata_iterator = _tms_rawdata_dataframe_iterator(tms_num, raw_data_files)
-
     # Iterator for all the timespans
     timespans = datetimerange(t_begin, t_end, delta_t)
     tms_aggregated_dfs = []
@@ -156,7 +156,7 @@ def aggregate_datafiles(
         raw_data_files: List[Tuple[Text, datetime.date, datetime.date]],
         all_tms_numbers: List[int],
         delta_t: datetime.timedelta) -> pd.DataFrame:
-
+    print(raw_data_files)
     first_date = min(raw_data_files, key=lambda f: f[1])[1]
     last_date = max(raw_data_files, key=lambda f: f[2])[2]
 
