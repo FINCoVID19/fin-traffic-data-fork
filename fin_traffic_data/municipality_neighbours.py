@@ -1,4 +1,6 @@
 municipality_neighbours = {
+        "Aura": ['Lieto', 'Masku', 'Mynämäki', 'Nousiainen', 'Pöytyä', 'Rusko', 'Turku'],
+        "Eckerö": ['Hammarland'],
         "Akaa": ['Hämeenlinna', 'Lempäälä', 'Urjala', 'Valkeakoski', 'Vesilahti'] ,
         "Alajärvi": ['Alavus', 'Kuortane', 'Kyyjärvi', 'Lappajärvi', 'Lapua', 'Soini', 'Vimpeli', 'Ähtäri'] ,
         "Alavieska": ['Kalajoki', 'Merijärvi', 'Oulainen', 'Ylivieska'] ,
@@ -315,6 +317,11 @@ municipality_neighbours = {
 "Vårdö": ['Föglö', 'Kumlinge', 'Lumparland', 'Saltvik', 'Sottunga', 'Sund'],
 "Finström": ['Geta', 'Saltvik', 'Hammarland', 'Jomala', 'Sund'],
 "Geta": ['Finström', 'Saltvik', 'Hammarland'],
-"Hammarland": ['Geta', 'Finström']
+"Hammarland": ['Geta', 'Finström'],
+"Närpes": ['Kaskinen', 'Korsnäs', 'Kristiinankaupunki', 'Kurikka', 'Maalahti', 'Teuva'],
+"Pedersöre": ['Evijärvi', 'Kauhava', 'Kruunupyy', 'Luoto', 'Pietarsaari', 'Uusikaarlepyy'],
+"Koski Tl": ['Loimaa', 'Marttila', 'Pöytyä', 'Salo', 'Somero', 'Ypäjä'],
+"Larsmo": ['Kokkola', 'Kruunupyy', 'Pedersören kunta', 'Pietarsaari'],
+"Mänttä-Vilppula": ['Keuruu', 'Virrat', 'Ruovesi', 'Juupajoki', 'Jämsä'],
     }
 

@@ -1,9 +1,12 @@
+import pickle
 import requests
 import pandas as pd
 from typing import Dict, Text, Tuple
 import numpy as np
-
+import os.path
 from fin_traffic_data.municipality_neighbours import municipality_neighbours
+import fin_traffic_data
+
 
 def get_tms_stations() -> pd.DataFrame:
     """
@@ -62,15 +65,13 @@ def get_municipalities() -> Dict[int, Text]:
     -------
     Dict
     """
-    resp = requests.get(
-        'https://tie.digitraffic.fi/api/v3/metadata/locations')
-
-    data = resp.json()
-
-    unique_elems = set([(int(i['properties']['municipalityCode']),
-                         i['properties']['municipality'])
-                        for i in data['features']])
-    return dict(unique_elems)
+    df = pd.read_csv(os.path.dirname(fin_traffic_data.__file__) +
+                     '/data/kunnat2020.csv',
+                     delimiter=',')
+    return dict(
+        [ (int(row['num'].replace("'","")), row['name']) for _,row in df.iterrows()]),\
+            dict(
+                [ (row['name'], [row['coords_x'], row['coords_y']]) for _,row in df.iterrows()])
 
 
 def get_municipality_to_province_map() -> Dict[int, Text]:
@@ -81,15 +82,10 @@ def get_municipality_to_province_map() -> Dict[int, Text]:
     -------
     Dict
     """
-    resp = requests.get(
-        'https://tie.digitraffic.fi/api/v3/metadata/tms-stations')
-
-    data = resp.json()
-
-    unique_elems = set([(int(i['properties']['municipalityCode']),
-                         int(i['properties']['provinceCode']))
-                        for i in data['features']])
-    return dict(unique_elems)
+    df = pd.read_csv(os.path.dirname(fin_traffic_data.__file__) +
+                     '/data/kunta2maakunta.txt',
+                     delimiter=';')
+    return dict(df[['kunta', 'maakunta']].values.tolist())
 
 
 def get_provinces() -> Dict[int, Text]:
@@ -131,7 +127,7 @@ def get_province_coordinates() -> Dict[Text, Tuple[float, float]]:
         'Varsinais-Suomi': [22.2666, 60.45189],
         'Ahvenanmaa': [19.9348, 60.0971],
         'Kanta-Häme': [24.4590, 60.9929],
-        'Päihät-Häme': [25.6612, 60.9827],
+        'Päijät-Häme': [25.6612, 60.9827],
         'Kymenlaakso': [26.7042, 60.8679],
         'Etelä-Karjala': [28.1897, 61.0550],
         'Etelä-Savo': [27.2721, 61.6887],
@@ -195,40 +191,125 @@ def get_neighbouring_municipalities_map():
     return municipality_neighbours
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     import networkx as nx
     import networkx.drawing.nx_pylab as nxd
     from networkx.algorithms import *
     import matplotlib.pyplot as plt
     tms_stations = get_tms_stations()
-    print(tms_stations)
-    municipalities = get_municipalities()
+    municipality_nums_with_tms = list(
+        set(tms_stations['municipality'].values.tolist()))
+    municipalities, municipalities_coords_map = get_municipalities()
     municipality_neighbours = get_neighbouring_municipalities_map()
 
     G = nx.Graph()
 
-    # Draw all municipalities with neighbours and whose neighbours have TMSs
-    for num, name in municipalities.items():
+    # Add all municipalities and connect them to their
+    # geographic neighbours
+    for mun_num, name in municipalities.items():
         G.add_node(name)
         neighbs = municipality_neighbours[name]
         for n2 in neighbs:
-            if n2 in municipalities.values():
-                G.add_edge(name, n2)
+            G.add_edge(name, n2)
 
-    isolates = list(nx.isolates(G))
-    G.remove_nodes_from(isolates)
-    for i in range(495):
-        tms_mun = municipalities[tms_stations.iloc[i]['municipality']]
+    # Graph of all municipalities with TMS
+    # and their connections. Edges with
+    # TMS are annotated with their info
+    Gtms = nx.DiGraph()
+    # Add all municipalities that have TMS
+    for mun_num in tms_stations['municipality'].values:
+        name = municipalities[mun_num]
+        Gtms.add_node(name)
+
+    # For all TMSs, add all municipalities
+    # from the path between the TMS
+    # and direction municipalities
+    for _, row in tms_stations.iterrows():
+        tms_num = row['num']
+        name = municipalities[row['municipality']]
         try:
-            tms_dir1_mun = municipalities[int(tms_stations.iloc[i]['dir1'])]
-            tms_dir2_mun = municipalities[int(tms_stations.iloc[i]['dir2'])]
-            path1 = bidirectional_shortest_path(G, tms_mun, tms_dir1_mun)
-            path2 = bidirectional_shortest_path(G, tms_mun, tms_dir2_mun)
-            tms_dir1_next_mun = path1[1]
-            tms_dir2_next_mun = path2[1]
-            print(tms_mun, tms_dir1_next_mun, tms_dir2_next_mun)
+            dir1_num = int(row['dir1'])
         except:
-            print(tms_mun, "failed")
-    nxd.draw_networkx(G)
-    plt.show()
+            dir1_num = None
+        try:
+            dir2_num = int(row['dir2'])
+        except:
+            dir2_num = None
+
+        if dir1_num:
+            try:
+                dir1 = municipalities[dir1_num]
+                path1 = bidirectional_shortest_path(G, name, dir1)
+                for i in range(len(path1) - 1):
+                    if i == 0:
+                        data = Gtms.get_edge_data(path1[i],
+                                                  path1[i + 1],
+                                                  default=None)
+                        if data:
+                            data['tms'] = data['tms'] + [int(tms_num)]
+                            data['tms_dir'] = data['tms_dir'] + [1]
+                        else:
+                            data = {'tms': [int(tms_num)], 'tms_dir': [1]}
+                        Gtms.add_edge(path1[i], path1[i + 1], **data)
+                    else:
+                        Gtms.add_edge(path1[i], path1[i + 1])
+            except:
+                print(f"Failed {name}: dir1, {dir1_num}")
+        if dir2_num:
+            try:
+                dir2 = municipalities[dir2_num]
+                path2 = bidirectional_shortest_path(G, name, dir2)
+                for i in range(len(path2) - 1):
+                    if i == 0:
+                        data = Gtms.get_edge_data(path2[i],
+                                                  path2[i + 1],
+                                                  default=None)
+                        if data:
+                            data['tms'] = data['tms'] + [int(tms_num)]
+                            data['tms_dir'] = data['tms_dir'] + [2]
+                        else:
+                            data = {'tms': [int(tms_num)], 'tms_dir': [2]}
+                        Gtms.add_edge(path2[i], path2[i + 1], **data)
+                    else:
+                        data = Gtms.get_edge_data(path2[i],
+                                                  path2[i + 1],
+                                                  default=None)
+                        if not data:
+                            Gtms.add_edge(path2[i], path2[i + 1])
+            except:
+                print(f"Failed {name}: dir2, {dir2_num}")
+
+    #
+    Gprovinces = nx.DiGraph()
+
+    province_name_to_coords_map = get_province_coordinates()
+    for key in province_name_to_coords_map.keys():
+        Gprovinces.add_node(key)
+
+    m2p = get_municipality_to_province_map()
+    for source, dest, mun_data in Gtms.edges(data=True):
+        if mun_data:
+            source_province = m2p[source]
+            dest_province = m2p[dest]
+            if source_province != dest_province:
+                data = Gprovinces.get_edge_data(source_province,
+                                                dest_province,
+                                                default=None)
+                if data:
+                    data['tms'] = data['tms'] + mun_data['tms']
+                    data['tms_dir'] = data['tms_dir'] + mun_data['tms_dir']
+                else:
+                    data = mun_data
+                Gprovinces.add_edge(source_province, dest_province, **data)
+
+    to_delete = list(nx.isolates(Gprovinces))
+    Gprovinces.remove_nodes_from(to_delete)
+
+    province_connections = dict([((edge[0], edge[1]), {
+        'tms': edge[2]['tms'],
+        'direction': edge[2]['tms_dir']
+    }) for edge in Gprovinces.edges(data=True)])
+    with open('maakunta_crossings.pkl', 'wb') as f:
+        pickle.dump(province_connections, f)
+
 
