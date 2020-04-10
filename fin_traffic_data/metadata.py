@@ -63,7 +63,7 @@ def get_municipalities() -> Dict[int, Text]:
     Dict
     """
     resp = requests.get(
-        'https://tie.digitraffic.fi/api/v3/metadata/tms-stations')
+        'https://tie.digitraffic.fi/api/v3/metadata/locations')
 
     data = resp.json()
 
@@ -194,12 +194,41 @@ def get_laani_coordinates():
 def get_neighbouring_municipalities_map():
     return municipality_neighbours
 
+
 if __name__=='__main__':
+    import networkx as nx
+    import networkx.drawing.nx_pylab as nxd
+    from networkx.algorithms import *
+    import matplotlib.pyplot as plt
+    tms_stations = get_tms_stations()
+    print(tms_stations)
     municipalities = get_municipalities()
-    un = []
-    neighb_mun = get_neighbouring_municipalities_map()
-    for key, val in neighb_mun.items():
-        for k in val:
-            if k not in neighb_mun.keys():
-                un.append(k)
-    print(sorted(set(un)))
+    municipality_neighbours = get_neighbouring_municipalities_map()
+
+    G = nx.Graph()
+
+    # Draw all municipalities with neighbours and whose neighbours have TMSs
+    for num, name in municipalities.items():
+        G.add_node(name)
+        neighbs = municipality_neighbours[name]
+        for n2 in neighbs:
+            if n2 in municipalities.values():
+                G.add_edge(name, n2)
+
+    isolates = list(nx.isolates(G))
+    G.remove_nodes_from(isolates)
+    for i in range(495):
+        tms_mun = municipalities[tms_stations.iloc[i]['municipality']]
+        try:
+            tms_dir1_mun = municipalities[int(tms_stations.iloc[i]['dir1'])]
+            tms_dir2_mun = municipalities[int(tms_stations.iloc[i]['dir2'])]
+            path1 = bidirectional_shortest_path(G, tms_mun, tms_dir1_mun)
+            path2 = bidirectional_shortest_path(G, tms_mun, tms_dir2_mun)
+            tms_dir1_next_mun = path1[1]
+            tms_dir2_next_mun = path2[1]
+            print(tms_mun, tms_dir1_next_mun, tms_dir2_next_mun)
+        except:
+            print(tms_mun, "failed")
+    nxd.draw_networkx(G)
+    plt.show()
+
