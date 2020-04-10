@@ -3,6 +3,7 @@ import pandas as pd
 from typing import Dict, Text, Tuple
 import numpy as np
 
+from fin_traffic_data.municipality_neighbours import municipality_neighbours
 
 def get_tms_stations() -> pd.DataFrame:
     """
@@ -72,6 +73,25 @@ def get_municipalities() -> Dict[int, Text]:
     return dict(unique_elems)
 
 
+def get_municipality_to_province_map() -> Dict[int, Text]:
+    """
+    Returns a mapping between municipality id and its name.
+
+    Returns
+    -------
+    Dict
+    """
+    resp = requests.get(
+        'https://tie.digitraffic.fi/api/v3/metadata/tms-stations')
+
+    data = resp.json()
+
+    unique_elems = set([(int(i['properties']['municipalityCode']),
+                         int(i['properties']['provinceCode']))
+                        for i in data['features']])
+    return dict(unique_elems)
+
+
 def get_provinces() -> Dict[int, Text]:
     """
     Returns a mapping between province id and its name.
@@ -105,7 +125,7 @@ def get_ely_centers() -> Dict[int, Text]:
     }
 
 
-def get_province_coordinates(api_key: Text) -> Dict[int, Tuple[float, float]]:
+def get_province_coordinates() -> Dict[Text, Tuple[float, float]]:
     coordinate_data = {
         'Uusimaa': [24.9384, 60.1699],
         'Varsinais-Suomi': [22.2666, 60.45189],
@@ -169,3 +189,17 @@ def get_laani_coordinates():
         'Keski-Suomen lääni': [25.7473, 62.2426],
         'Pohjois-Karjalan lääni': [29.7636, 62.6010]
     }
+
+
+def get_neighbouring_municipalities_map():
+    return municipality_neighbours
+
+if __name__=='__main__':
+    municipalities = get_municipalities()
+    un = []
+    neighb_mun = get_neighbouring_municipalities_map()
+    for key, val in neighb_mun.items():
+        for k in val:
+            if k not in neighb_mun.keys():
+                un.append(k)
+    print(sorted(set(un)))
