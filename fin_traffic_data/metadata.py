@@ -1,7 +1,7 @@
 import requests
 import pandas as pd
 from typing import Dict, Text
-
+import numpy as np
 
 def get_tms_stations() -> pd.DataFrame:
     """
@@ -60,17 +60,12 @@ def get_municipalities() -> Dict[int, Text]:
     -------
     Dict
     """
-    resp = requests.get('https://tie.digitraffic.fi/api/v3/metadata/locations')
+    resp = requests.get('https://tie.digitraffic.fi/api/v3/metadata/tms-stations')
 
     data = resp.json()
 
-    iters = filter(
-        lambda item: item['properties']['subtypeCode'].startswith('A9.'),
-        data['features'])
-    municipality_id_name_map = dict(
-        sorted([(int(it['id']), it['properties']['firstName'])
-                for it in iters]))
-    return municipality_id_name_map
+    unique_elems = set([ (int(i['properties']['municipalityCode']), i['properties']['municipality']) for i in data['features']])
+    return dict(unique_elems)
 
 
 def get_provinces() -> Dict[int, Text]:
@@ -81,17 +76,12 @@ def get_provinces() -> Dict[int, Text]:
     -------
     Dict
     """
-    resp = requests.get('https://tie.digitraffic.fi/api/v3/metadata/locations')
+    resp = requests.get('https://tie.digitraffic.fi/api/v3/metadata/tms-stations')
 
     data = resp.json()
 
-    iters = filter(
-        lambda item: item['properties']['subtypeCode'].startswith('A8.'),
-        data['features'])
-    province_id_name_map = dict(
-        sorted([(int(it['id']), it['properties']['firstName'])
-                for it in iters]))
-    return province_id_name_map
+    unique_elems = set([ (int(i['properties']['provinceCode']), i['properties']['province']) for i in data['features']])
+    return dict(unique_elems)
 
 def get_ely_centers() -> Dict[int, Text]:
     return {
