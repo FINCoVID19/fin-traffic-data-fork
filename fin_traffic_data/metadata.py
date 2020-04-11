@@ -194,6 +194,29 @@ def get_neighbouring_municipalities_map():
     return municipality_neighbours
 
 
+def get_province_to_catchment_area_map():
+    return {
+        'Varsinais-Suomi': 'TYKS',
+        'Satakunta': 'TYKS',
+        'Uusimaa': 'HYKS',
+        'Kanta-Häme': 'TAYS',
+        'Pirkanmaa': 'TAYS',
+        'Päijät-Häme': 'HYKS',
+        'Kymenlaakso': 'HYKS',
+        'Etelä-Karjala': 'HYKS',
+        'Etelä-Savo': 'KYS',
+        'Pohjois-Karjala': 'KYS',
+        'Pohjois-Savo': 'KYS',
+        'Keski-Suomi': 'KYS',
+        'Pohjanmaa': 'OYS',
+        'Etelä-Pohjanmaa': 'TAYS',
+        'Keski-Pohjanmaa': 'OYS',
+        'Pohjois-Pohjanmaa': 'OYS',
+        'Kainuu': 'OYS',
+        'Lappi': 'OYS',
+    }
+
+
 if __name__ == '__main__':
     import networkx as nx
     import networkx.drawing.nx_pylab as nxd
