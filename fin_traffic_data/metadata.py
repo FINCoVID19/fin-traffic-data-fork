@@ -189,6 +189,18 @@ def get_laani_coordinates():
         'Pohjois-Karjalan lääni': [29.7636, 62.6010]
     }
 
+def get_catchment_area_coordinates():
+    return {
+        'TYKS': [21.7974, 61.4851],
+        'HYKS': [24.9384, 60.1699],
+        'OYS': [25.4651, 65.0121],
+        'KYS': [27.6782, 62.8980],
+        'TAYS': [23.7610, 61.4978],
+        'Norja': [24.200713, 69.647095],
+        'Ruotsi': [18.283758, 65.691331],
+        'Venäjä': [35.411563, 65.140340]
+    }
+
 
 def get_neighbouring_municipalities_map():
     return municipality_neighbours
