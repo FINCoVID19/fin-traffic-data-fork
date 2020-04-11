@@ -141,7 +141,10 @@ def get_province_coordinates() -> Dict[Text, Tuple[float, float]]:
         'Pohjois-Karjala': [29.7636, 62.6010],
         'Kainuu': [27.7278, 64.2222],
         'Pohjois-Pohjanmaa': [25.4651, 65.0121],
-        'Lappi': [25.7294, 66.5039]
+        'Lappi': [25.7294, 66.5039],
+        'Norja': [24.200713, 69.647095],
+        'Ruotsi': [18.283758, 65.691331],
+        'Venäjä': [35.411563, 65.140340]
     }
 
     return coordinate_data
