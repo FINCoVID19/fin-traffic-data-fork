@@ -170,16 +170,37 @@ def _aggregate_core(tms_num, t_begin, t_end, delta_t, raw_data_files, append_to_
     tms_aggregated_dfs = []
     try:
         df, file_Tbegin, file_Tend = next(rawdata_iterator)
+        for tb, te in timespans:
+            _tmp_df, file_Tbegin, file_Tend = _aggregate_single_timeinterval(
+                tms_num, tb, te, delta_t, df, file_Tbegin, file_Tend, rawdata_iterator
+            )
+            tms_aggregated_dfs.append(_tmp_df)
+        tms_df = pd.concat(tms_aggregated_dfs)
     except StopIteration:
-        return None  # TODO: Replace by zeroed aggregate dataframe
-    for tb, te in timespans:
-        _tmp_df, file_Tbegin, file_Tend = _aggregate_single_timeinterval(
-            tms_num, tb, te, delta_t, df, file_Tbegin, file_Tend, rawdata_iterator
+        print(f"No data for TMS {tms_num}")
+        begin_times = []
+        center_times = []
+        end_times = []
+        for tb, te in timespans:
+            begin_times += [tb] * len(_keys_default)
+            center_times += [te + (te-tb) / 2] * len(_keys_default)
+            end_times += [te] * len(_keys_default)
+        timespans = datetimerange(t_begin, t_end, delta_t)
+
+        keys = np.repeat(_keys_default, repeats=sum(1 for _ in timespans), axis=0)
+        tms_df = pd.DataFrame(
+            {
+                'beginning of time interval': begin_times,
+                'time': center_times,
+                'end of time interval': end_times,
+                'direction': keys[:, 1],
+                'vehicle category': keys[:, 0],
+                'counts': np.zeros_like(center_times).tolist()
+            }
         )
-        tms_aggregated_dfs.append(_tmp_df)
-    tms_df = pd.concat(tms_aggregated_dfs)
     with lock:
         if append_to_file:
+
             tms_df.to_hdf(
                 append_to_file, key=f'tms_{tms_num}', complevel=9, format='table', nan_rep='None', append=True
             )
@@ -226,9 +247,7 @@ class AggregationEngine:
         tms_num: int
             Number of the TMS station
         """
-        _aggregate_core(
-            tms_num, self.time0, self.time_end, self.delta_t, self.raw_data_files, self.append_to_file
-        )
+        _aggregate_core(tms_num, self.time0, self.time_end, self.delta_t, self.raw_data_files, self.append_to_file)
 
 
 def init(arg_lock):
@@ -288,6 +307,7 @@ def aggregate_datafiles(
     lock = multiprocessing.Lock()  # For locking data saving operations
     pool = multiprocessing.Pool(initializer=init, initargs=(lock, ))
     engine = AggregationEngine(time0, time_end, delta_t, raw_data_files, afile_to_append)
+    init(lock)
     for _ in tqdm.tqdm(pool.imap(engine, all_tms_numbers)):
         pass
 
