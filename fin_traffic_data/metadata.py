@@ -21,37 +21,30 @@ def get_tms_stations() -> pd.DataFrame:
         - dir1 : integer code of the direction 1 municipality
         - dir2 : integer code of the direction 2 municipality
     """
-    resp = requests.get(
-        'https://tie.digitraffic.fi/api/v3/metadata/tms-stations')
+    resp = requests.get('https://tie.digitraffic.fi/api/v3/metadata/tms-stations')
     data = resp.json()['features']
 
     tms_ids = [int(tms['id']) for tms in data]
     tms_nums = [tms['properties']['tmsNumber'] for tms in data]
     tms_latitude = [tms['geometry']['coordinates'][0] for tms in data]
     tms_longitude = [tms['geometry']['coordinates'][1] for tms in data]
-    tms_municipality_codes = [
-        int(tms['properties']['municipalityCode']) for tms in data
-    ]
-    tms_province_codes = [
-        int(tms['properties']['provinceCode']) for tms in data
-    ]
-    tms_dir1_municipality_codes = [
-        tms['properties']['direction1MunicipalityCode'] for tms in data
-    ]
-    tms_dir2_municipality_codes = [
-        tms['properties']['direction2MunicipalityCode'] for tms in data
-    ]
+    tms_municipality_codes = [int(tms['properties']['municipalityCode']) for tms in data]
+    tms_province_codes = [int(tms['properties']['provinceCode']) for tms in data]
+    tms_dir1_municipality_codes = [tms['properties']['direction1MunicipalityCode'] for tms in data]
+    tms_dir2_municipality_codes = [tms['properties']['direction2MunicipalityCode'] for tms in data]
 
-    df = pd.DataFrame({
-        'id': tms_ids,
-        'num': tms_nums,
-        'latitude': tms_latitude,
-        'longitude': tms_longitude,
-        'municipality': tms_municipality_codes,
-        'province': tms_province_codes,
-        'dir1': tms_dir1_municipality_codes,
-        'dir2': tms_dir2_municipality_codes
-    })
+    df = pd.DataFrame(
+        {
+            'id': tms_ids,
+            'num': tms_nums,
+            'latitude': tms_latitude,
+            'longitude': tms_longitude,
+            'municipality': tms_municipality_codes,
+            'province': tms_province_codes,
+            'dir1': tms_dir1_municipality_codes,
+            'dir2': tms_dir2_municipality_codes
+        }
+    )
     return df
 
 
@@ -69,9 +62,7 @@ def get_municipality_info() -> pd.DataFrame:
     -------
     pandas.DataFrame
     """
-    df = pd.read_csv(os.path.dirname(fin_traffic_data.__file__) +
-                     '/data/municipality_info.csv',
-                     index_col=[0])
+    df = pd.read_csv(os.path.dirname(fin_traffic_data.__file__) + '/data/municipality_info.csv', index_col=[0])
     return df
 
 
@@ -89,9 +80,7 @@ def get_province_info() -> pd.DataFrame:
     -------
     pandas.DataFrame
     """
-    df = pd.read_csv(os.path.dirname(fin_traffic_data.__file__) +
-                     '/data/province_info.csv',
-                     index_col=[0])
+    df = pd.read_csv(os.path.dirname(fin_traffic_data.__file__) + '/data/province_info.csv', index_col=[0])
     return df
 
 
@@ -103,9 +92,7 @@ def get_erva_info() -> pd.DataFrame:
     -------
     pandas.DataFrame
     """
-    df = pd.read_csv(os.path.dirname(fin_traffic_data.__file__) +
-                     '/data/erva_coordinates.csv',
-                     index_col=[0])
+    df = pd.read_csv(os.path.dirname(fin_traffic_data.__file__) + '/data/erva_coordinates.csv', index_col=[0])
     return df
 
 
@@ -117,8 +104,5 @@ def get_neighbouring_municipalities_map() -> Dict:
     -------
     Dict
     """
-    neighbour_map = json.load(
-        open(
-            os.path.dirname(fin_traffic_data.__file__) +
-            '/data/province_info.csv', 'r'))
+    neighbour_map = json.load(open(os.path.dirname(fin_traffic_data.__file__) + '/data/province_info.csv', 'r'))
     return neighbour_map
