@@ -1,4 +1,4 @@
-maakuntaNumero,maakunta,latitude,longitude,erva,ely-keskus (liikenne)
+provinceNumber,province,latitude,longitude,erva,ely-center (traffic)
 1,Uusimaa,60.1699,24.9384,HYKS,1
 2,Varsinais-Suomi,60.45189,22.2666,TYKS,2
 10,Etelä-Savo,61.6887,27.2721,KYS,8
