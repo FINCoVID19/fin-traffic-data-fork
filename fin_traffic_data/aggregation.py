@@ -270,7 +270,7 @@ def aggregate_datafiles(
         def get_daterange(afilename):
             m = re.match(
                 r"aggregated_data\/fin-traffic-" + f"{delta_t}" +
-                r"-(?P<begindate>\d{4}-\d{2}-\d{2})\s00:00:00-(?P<enddate>\d{4}-\d{2}-\d{2})\s00:00:00\.h5", afilename
+                r"-(?P<begindate>\d{4}-\d{2}-\d{2})(\s00:00:00)?-(?P<enddate>\d{4}-\d{2}-\d{2})(\s00:00:00)?\.h5", afilename
             )
             d1 = [int(i) for i in m.group("begindate").split('-')]
             d2 = [int(i) for i in m.group('enddate').split('-')]
@@ -298,7 +298,8 @@ def aggregate_datafiles(
             year=afile_lastday.year, month=afile_lastday.month, day=afile_lastday.day, hour=0, minute=0
         )
         time_end = datetime.datetime(year=last_date.year, month=last_date.month, day=last_date.day, hour=0, minute=0)
-        new_filename = f'aggregated_data/fin-traffic-{delta_t}-{afile_firstday}-{time_end}.h5'
+        date_end = datetime.datetime(year=last_date.year, month=last_date.month, day=last_date.day)
+        new_filename = f'aggregated_data/fin-traffic-{delta_t}-{afile_firstday}-{date_end}.h5'
     except Exception:
         afile_to_append = None
         time0 = datetime.datetime(year=first_date.year, month=first_date.month, day=first_date.day, hour=0, minute=0)
