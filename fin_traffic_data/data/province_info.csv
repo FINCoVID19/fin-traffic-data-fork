@@ -1,14 +1,19 @@
 provinceNumber,province,latitude,longitude,erva,ely-center (traffic)
 1,Uusimaa,60.1699,24.9384,HYKS,1
 2,Varsinais-Suomi,60.45189,22.2666,TYKS,2
-10,Etelä-Savo,61.6887,27.2721,KYS,8
-13,Keski-Suomi,62.2426,25.7473,KYS,9
-6,Pirkanmaa,61.4978,23.761,TAYS,4
 4,Satakunta,61.4851,21.7974,TYKS,2
-15,Pohjanmaa,63.0951,21.6165,OYS,10
-14,Etelä-Pohjanmaa,62.7877,22.8504,TAYS,10
+5,Kanta-Häme,60.9070,24.3005,TAYS,1
+6,Pirkanmaa,61.4978,23.761,TAYS,4
+7,Päijät-Häme,61.3230,25.7322,HYKS,1
+8,Kymenlaakso,60.7805,26.8829,HYKS,1
+9,Etelä-Karjala,61.1182,28.1024,KYS,8
+10,Etelä-Savo,61.6887,27.2721,KYS,8
 11,Pohjois-Savo,62.898,27.6782,KYS,8
 12,Pohjois-Karjala,62.601000000000006,29.7636,KYS,8
+13,Keski-Suomi,62.2426,25.7473,KYS,9
+14,Etelä-Pohjanmaa,62.7877,22.8504,TAYS,10
+15,Pohjanmaa,63.0951,21.6165,OYS,10
+16,Keski-Pohjanmaa,63.5622,24.0014,OYS,10
 18,Kainuu,64.2222,27.7278,OYS,12
 17,Pohjois-Pohjanmaa,65.0121,25.4651,OYS,12
 19,Lappi,66.5039,25.7294,OYS,14
