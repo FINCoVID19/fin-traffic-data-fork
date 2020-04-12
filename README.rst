@@ -54,10 +54,3 @@ Here the options are
 The script spits out a file named 
 `fin_traffic_aggregated_<begin-date>_<end-date>_<time-resolution>.pd.h5`.
 
-
-Building a municipality graph
------------------------------
-
-
-Visualizing aggregated data
----------------------------

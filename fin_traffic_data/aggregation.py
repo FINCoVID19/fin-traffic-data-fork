@@ -267,14 +267,19 @@ def aggregate_datafiles(
 
         afile_dateranges = list(filter(lambda s: s[1][0] < last_date, afile_dateranges))
         afile_to_append = max(afile_dateranges, key=lambda f: f[1][1])
-
+        afile_firstday = afile_to_append[1][0]
         afile_lastday = afile_to_append[1][1]
+
+        if last_date <= afile_lastday:
+            print("Data already in a aggregate time")
+            exit(0)
+
         afile_to_append = afile_to_append[0]
         time0 = datetime.datetime(
             year=afile_lastday.year, month=afile_lastday.month, day=afile_lastday.day, hour=0, minute=0
         )
         time_end = datetime.datetime(year=last_date.year, month=last_date.month, day=last_date.day, hour=0, minute=0)
-        new_filename = f'aggregated_data/fin-traffic-{delta_t}-{afile_to_append[1][0]}-{time_end}.h5'
+        new_filename = f'aggregated_data/fin-traffic-{delta_t}-{afile_firstday}-{time_end}.h5'
     except Exception:
         afile_to_append = None
         time0 = datetime.datetime(year=first_date.year, month=first_date.month, day=first_date.day, hour=0, minute=0)
