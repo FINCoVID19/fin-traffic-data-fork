@@ -56,6 +56,7 @@ setup(
             'fin-traffic-fetch-raw-data = fin_traffic_data.scripts.fetch_raw_data:main',
             'fin-traffic-aggregate-raw-data = fin_traffic_data.scripts.aggregate_raw_data:main',
             'fin-traffic-compute-traffic-between-areas = fin_traffic_data.scripts.get_aggregated_traffic_between_areas:main',
+            'fin-traffic-export-traffic-between-areas-to-csv = fin_traffic_data.scripts.export_area_data_as_csv:main',
         ]
     },
     install_requires=get_requirements(),

@@ -67,7 +67,7 @@ def main():
         cols.remove('index')
         cols.remove('direction')
         df = df[cols]
-        df.to_hdf(f'tms_between_{area}.h5', key=f"{row['source']}:{row['destination']}", complevel=9, format='table')
+        df.to_hdf(f'tms_between_{area}s.h5', key=f"{row['source']}:{row['destination']}", complevel=9, format='table')
 
     # Create map of areaName -> (longitude, latitude)
     if area == Area.PROVINCE:
