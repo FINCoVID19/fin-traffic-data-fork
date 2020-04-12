@@ -1,4 +1,4 @@
-import pickle
+import json
 import requests
 import pandas as pd
 from typing import Dict, Text, Tuple
@@ -62,7 +62,7 @@ def get_municipality_info() -> pd.DataFrame:
     -------
     pandas.DataFrame
     """
-    df = pd.read_csv(os.path.dirname(fin_traffic_data.__file__) + '/data/municipality_info.csv', index_col=[0])
+    df = pd.read_csv(os.path.dirname(__file__) + '/data/municipality_info.csv', index_col=[0])
     return df
 
 
@@ -80,7 +80,7 @@ def get_province_info() -> pd.DataFrame:
     -------
     pandas.DataFrame
     """
-    df = pd.read_csv(os.path.dirname(fin_traffic_data.__file__) + '/data/province_info.csv', index_col=[0])
+    df = pd.read_csv(os.path.dirname(__file__) + '/data/province_info.csv', index_col=[0])
     return df
 
 
@@ -92,7 +92,7 @@ def get_erva_info() -> pd.DataFrame:
     -------
     pandas.DataFrame
     """
-    df = pd.read_csv(os.path.dirname(fin_traffic_data.__file__) + '/data/erva_coordinates.csv', index_col=[0])
+    df = pd.read_csv(os.path.dirname(__file__) + '/data/erva_coordinates.csv', index_col=[0])
     return df
 
 
@@ -104,5 +104,5 @@ def get_neighbouring_municipalities_map() -> Dict:
     -------
     Dict
     """
-    neighbour_map = json.load(open(os.path.dirname(fin_traffic_data.__file__) + '/data/province_info.csv', 'r'))
+    neighbour_map = json.load(open(os.path.dirname(__file__) + '/data/province_info.csv', 'r'))
     return neighbour_map

@@ -7,11 +7,11 @@ provinceNumber,province,latitude,longitude,erva,ely-center (traffic)
 4,Satakunta,61.4851,21.7974,TYKS,2
 15,Pohjanmaa,63.0951,21.6165,OYS,10
 14,Etelä-Pohjanmaa,62.7877,22.8504,TAYS,10
-11Pohjois-Savo,62.898,27.6782,KYS,8
+11,Pohjois-Savo,62.898,27.6782,KYS,8
 12,Pohjois-Karjala,62.601000000000006,29.7636,KYS,8
 18,Kainuu,64.2222,27.7278,OYS,12
 17,Pohjois-Pohjanmaa,65.0121,25.4651,OYS,12
 19,Lappi,66.5039,25.7294,OYS,14
 -1,Norja,69.647095,24.200713,Norja,-1
--2,Ruotsi,65.691331,18.283758,Ruotsi,-1
--3,Venäjä,65.14034000000001,35.411563,Venäjä,-1
+-2,Ruotsi,65.691331,18.283758,Ruotsi,-2
+-3,Venäjä,65.14034000000001,35.411563,Venäjä,-3
