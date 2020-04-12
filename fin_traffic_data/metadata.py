@@ -4,8 +4,6 @@ import pandas as pd
 from typing import Dict, Text, Tuple
 import numpy as np
 import os.path
-from fin_traffic_data.municipality_neighbours import municipality_neighbours
-import fin_traffic_data
 
 
 def get_tms_stations() -> pd.DataFrame:
@@ -57,36 +55,23 @@ def get_tms_stations() -> pd.DataFrame:
     return df
 
 
-def get_municipalities() -> Dict[int, Text]:
+def get_municipality_info() -> pd.DataFrame:
     """
-    Returns a mapping between municipality id and its name.
+    Returns the following information on every municipality:
+        - it's municipalityNumber
+        - name
+        - province it belongs to
+        - provinceNumber
+        - latitude
+        - longitude
 
     Returns
     -------
-    Dict
+    pandas.DataFrame
     """
     df = pd.read_csv(os.path.dirname(fin_traffic_data.__file__) +
-                     '/data/kunnat2020.csv',
-                     delimiter=',')
-    return dict(
-        [ (int(row['num'].replace("'","")), row['name']) for _,row in df.iterrows()]),\
-            dict(
-                [ (row['name'], [row['coords_x'], row['coords_y']]) for _,row in df.iterrows()])
-
-
-def get_municipality_to_province_map() -> Dict[int, Text]:
-    """
-    Returns a mapping between municipality id and its name.
-
-    Returns
-    -------
-    Dict
-    """
-    df = pd.read_csv(os.path.dirname(fin_traffic_data.__file__) +
-                     '/data/kunta2maakunta.txt',
-                     delimiter=';')
-    return dict(df[['kunta', 'maakunta']].values.tolist())
-
+                     '/data/municipality_info.csv', index_col=[0])
+    return df
 
 def get_provinces() -> Dict[int, Text]:
     """
