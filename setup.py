@@ -13,6 +13,7 @@ def read(fname):
 
 
 class MypyCommand(Command):
+
     """ Class for running the MYPY static type checker on the package """
 
     description = 'Runs the MYPY static type checker on ' + my_pkg.__name__
@@ -30,30 +31,31 @@ class MypyCommand(Command):
         print(res[0])
         return res[1]
 
+
 def get_requirements():
     with open('requirements.txt', 'r') as f:
         return f.readlines()
+
 
 setup(
     name=my_pkg.__name__,
     author=my_pkg.__author__,
     author_email=my_pkg.__author_email__,
     classifiers=[
-        'Development Status :: 1 - Alpha', 'Environment :: Console',
-        'Intended Audience :: Developers',
-        'License :: Other/Proprietary License',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.8'
+        'Development Status :: 1 - Alpha', 'Environment :: Console', 'Intended Audience :: Developers',
+        'License :: Other/Proprietary License', 'Operating System :: OS Independent',
+        'Programming Language :: Python :: 3 :: Only', 'Programming Language :: Python :: 3.8'
     ],
     cmdclass={
         'mypy': MypyCommand,
     },
     data_files=[],
     description="Fetching and aggregation of traffic data from Finnish roads",
-    entry_points = {
+    entry_points={
         'console_scripts': [
-            'fin-traffic-fetch-raw-data = fin_traffic_data.scripts.fetch_raw_data:main'
+            'fin-traffic-fetch-raw-data = fin_traffic_data.scripts.fetch_raw_data:main',
+            'fin-traffic-aggregate-raw-data = fin_traffic_data.scripts.aggregate_raw_data:main',
+            'fin-traffic-compute-traffic-between-areas = fin_traffic_data.scripts.get_aggregated_traffic_between_areas:main',
         ]
     },
     install_requires=get_requirements(),
@@ -65,4 +67,5 @@ setup(
     tests_require=['nose2', 'mypy'],
     url='https://www.solanpaa.fi',
     version=my_pkg.__version__,
-    zip_safe=True)
+    zip_safe=True
+)
