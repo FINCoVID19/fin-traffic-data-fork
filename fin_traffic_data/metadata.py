@@ -106,3 +106,21 @@ def get_neighbouring_municipalities_map() -> Dict:
     """
     neighbour_map = json.load(open(os.path.dirname(__file__) + '/data/province_info.csv', 'r'))
     return neighbour_map
+
+
+def get_tms_over_province_borders() -> pd.DataFrame:
+    """
+    Returns a dataframe of TMS stations and the measurement directions
+    between provinces.
+    """
+    df = pd.read_csv(os.path.dirname(__file__) + '/data/tms_over_province_borders.csv')
+    return df
+
+
+def get_tms_over_erva_borders() -> pd.DataFrame:
+    """
+    Returns a dataframe of TMS stations and the measurement directions
+    between ERVAs.
+    """
+    df = pd.read_csv(os.path.dirname(__file__) + '/data/tms_over_erva_borders.csv')
+    return df
