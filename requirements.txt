@@ -1,3 +1,4 @@
+networkx
 progressbar2
 pandas
 numpy
@@ -7,3 +8,4 @@ requests
 h5py
 tables
 mypy
+tqdm

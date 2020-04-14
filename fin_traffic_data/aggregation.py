@@ -181,6 +181,7 @@ def _aggregate_core(tms_num, t_begin, t_end, delta_t, raw_data_files, append_to_
         begin_times = []
         center_times = []
         end_times = []
+        timespans = datetimerange(t_begin, t_end, delta_t)
         for tb, te in timespans:
             begin_times += [tb] * len(_keys_default)
             center_times += [te + (te-tb) / 2] * len(_keys_default)
@@ -309,9 +310,11 @@ def aggregate_datafiles(
     pool = multiprocessing.Pool(initializer=init, initargs=(lock, ))
     engine = AggregationEngine(time0, time_end, delta_t, raw_data_files, afile_to_append)
     init(lock)
-    for _ in tqdm.tqdm(pool.imap(engine, all_tms_numbers)):
+    for tms in all_tms_numbers:
+        engine(tms)
+    """for _ in tqdm.tqdm(pool.imap(engine, all_tms_numbers)):
         pass
-
+    """
     if afile_to_append:
         path = pathlib.Path(afile_to_append)
         path.replace(new_filename)
