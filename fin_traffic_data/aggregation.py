@@ -271,7 +271,8 @@ def aggregate_datafiles(
         def get_daterange(afilename):
             m = re.match(
                 r"aggregated_data\/fin-traffic-" + f"{delta_t}" +
-                r"-(?P<begindate>\d{4}-\d{2}-\d{2})(\s00:00:00)?-(?P<enddate>\d{4}-\d{2}-\d{2})(\s00:00:00)?\.h5", afilename
+                r"-(?P<begindate>\d{4}-\d{2}-\d{2})(\s00:00:00)?-(?P<enddate>\d{4}-\d{2}-\d{2})(\s00:00:00)?\.h5",
+                afilename
             )
             d1 = [int(i) for i in m.group("begindate").split('-')]
             d2 = [int(i) for i in m.group('enddate').split('-')]
@@ -309,12 +310,8 @@ def aggregate_datafiles(
     lock = multiprocessing.Lock()  # For locking data saving operations
     pool = multiprocessing.Pool(initializer=init, initargs=(lock, ))
     engine = AggregationEngine(time0, time_end, delta_t, raw_data_files, afile_to_append)
-    init(lock)
-    for tms in all_tms_numbers:
-        engine(tms)
-    """for _ in tqdm.tqdm(pool.imap(engine, all_tms_numbers)):
+    for _ in tqdm.tqdm(pool.imap(engine, all_tms_numbers)):
         pass
-    """
     if afile_to_append:
         path = pathlib.Path(afile_to_append)
         path.replace(new_filename)
