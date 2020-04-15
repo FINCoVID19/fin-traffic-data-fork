@@ -300,7 +300,7 @@ def aggregate_datafiles(
             year=afile_lastday.year, month=afile_lastday.month, day=afile_lastday.day, hour=0, minute=0
         )
         time_end = datetime.datetime(year=last_date.year, month=last_date.month, day=last_date.day, hour=0, minute=0)
-        date_end = datetime.datetime(year=last_date.year, month=last_date.month, day=last_date.day)
+        date_end = datetime.date(year=last_date.year, month=last_date.month, day=last_date.day)
         new_filename = f'aggregated_data/fin-traffic-{delta_t}-{afile_firstday}-{date_end}.h5'
     except Exception:
         afile_to_append = None
