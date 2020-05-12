@@ -18,7 +18,6 @@ from fin_traffic_data.utils import *
 # Info on TMS data
 _vehicle_categories = [1, 2, 3, 4, 5, 6, 7]
 _directions = [1, 2]
-_keys_default = np.array([r for r in itertools.product(_vehicle_categories, _directions)])
 
 
 def list_rawdata_files(path: Text):
@@ -100,51 +99,12 @@ def _tms_rawdata_dataframe_iterator(tms_num, raw_data_files):
     for fileinfo in raw_data_files:
         try:
             df = pd.read_hdf(fileinfo[0], key=f"tms_{tms_num}", mode='r')
-            datetime_begin = datetime.datetime(year=fileinfo[1].year, month=fileinfo[1].month, day=fileinfo[1].day)
-            datetime_end = datetime.datetime(year=fileinfo[2].year, month=fileinfo[2].month, day=fileinfo[2].day)
-            yield (df, datetime_begin, datetime_end)
+            yield df
         except Exception as e:
             ...
 
 
-def _aggregate_single_timeinterval(tms_num, t_begin, t_end, delta_t, df, file_Tbegin, file_Tend, rawdata_iterator):
-    tb_in_file = file_Tbegin <= t_begin < file_Tend
-    te_in_file = file_Tbegin <= t_end <= file_Tend
-    if tb_in_file and te_in_file:  # The time interval is in the file
-        vehicle_counts = [
-            df.loc[reduce(
-                np.logical_and,
-                (t_begin <= df['time'], df['time'] < t_end, df['direction'] == d, df['vehicle category'] == cat)
-            )].size for cat, d in _keys_default
-        ]
-
-        keys = _keys_default
-        begin_times = [t_begin] * len(keys)
-        center_times = [t_begin + (t_end-t_begin) / 2] * len(keys)
-        end_times = [t_end] * len(keys)
-        res = pd.DataFrame(
-            {
-                'beginning of time interval': begin_times,
-                'time': center_times,
-                'end of time interval': end_times,
-                'direction': keys[:, 1],
-                'vehicle category': keys[:, 0],
-                'counts': vehicle_counts
-            }
-        )
-    elif tb_in_file and not te_in_file:  # Begin is in the file, but end is not.
-        raise NotImplementedError()
-    elif not tb_in_file and te_in_file:  # Time interval is wrong way around. Shouldn't happen.
-        raise RuntimeError()
-    else:  # Next file needed
-        df, file_Tbegin, file_Tend = next(rawdata_iterator)
-        res, file_Tbegin, file_Tend = _aggregate_single_timeinterval(
-            tms_num, t_begin, t_end, delta_t, df, file_Tbegin, file_Tend, rawdata_iterator
-        )
-    return res, file_Tbegin, file_Tend
-
-
-def _aggregate_core(tms_num, t_begin, t_end, delta_t, raw_data_files, append_to_file) -> pd.DataFrame:
+def _aggregate_core(tms_num, mintime, maxtime, delta_t, raw_data_files, append_to_file) -> pd.DataFrame:
     """
     Aggregates all data on the TMS between two datetimes
 
@@ -152,10 +112,6 @@ def _aggregate_core(tms_num, t_begin, t_end, delta_t, raw_data_files, append_to_
     -----
     tms_num: int
         Number of the TMS station
-    t_begin: datetime.datetime
-        Begin time of the interval to aggregate
-    t_end: datetime.datetime
-        End time of the interval to aggregate
     delta_t: datetime.timedelta
         Time resolution
     raw_data_files: Iterator
@@ -165,55 +121,37 @@ def _aggregate_core(tms_num, t_begin, t_end, delta_t, raw_data_files, append_to_
     # Iterator for the dataframes containing raw data for this particular
     # measuring station
     rawdata_iterator = _tms_rawdata_dataframe_iterator(tms_num, raw_data_files)
-    # Iterator for all the timespans
-    timespans = datetimerange(t_begin, t_end, delta_t)
-    tms_aggregated_dfs = []
+
+    frames = [df for df in rawdata_iterator]
+    nodata = False
     try:
-        df, file_Tbegin, file_Tend = next(rawdata_iterator)
-        for tb, te in timespans:
-            _tmp_df, file_Tbegin, file_Tend = _aggregate_single_timeinterval(
-                tms_num, tb, te, delta_t, df, file_Tbegin, file_Tend, rawdata_iterator
-            )
-            tms_aggregated_dfs.append(_tmp_df)
-        tms_df = pd.concat(tms_aggregated_dfs)
-    except StopIteration:
-        print(f"No data for TMS {tms_num}")
-        begin_times = []
-        center_times = []
-        end_times = []
-        timespans = datetimerange(t_begin, t_end, delta_t)
-        for tb, te in timespans:
-            begin_times += [tb] * len(_keys_default)
-            center_times += [te + (te-tb) / 2] * len(_keys_default)
-            end_times += [te] * len(_keys_default)
-        timespans = datetimerange(t_begin, t_end, delta_t)
+        df = pd.concat(frames, ignore_index=True).drop('tms_id', axis=1)
+    except:
+        nodata = True
+    if not nodata:
+        df['counts'] = np.ones(df.shape[0], dtype=int)
 
-        keys = np.repeat(_keys_default, repeats=sum(1 for _ in timespans), axis=0)
-        tms_df = pd.DataFrame(
-            {
-                'beginning of time interval': begin_times,
-                'time': center_times,
-                'end of time interval': end_times,
-                'direction': keys[:, 1],
-                'vehicle category': keys[:, 0],
-                'counts': np.zeros_like(center_times).tolist()
-            }
-        )
+        df = df.groupby(
+            [
+                pd.Grouper(key='time', freq=delta_t, closed='left', label='left'),
+                pd.Grouper('direction'),
+                pd.Grouper('vehicle category')
+            ]
+        ).count()
+
+
+    times = [i[0] for i in datetimerange(mintime, maxtime, delta_t)]
+    empty = pd.DataFrame(
+        np.array(list(itertools.product(times, _directions, _vehicle_categories, [0]))),
+        columns=['time', 'direction', 'vehicle category', 'counts']
+    ).groupby([pd.Grouper('time'), pd.Grouper('direction'),
+               pd.Grouper('vehicle category')]).count()
+    if not nodata:
+        df = empty.add(df).fillna(0)
+    else:
+        df = empty
     with lock:
-        if append_to_file:
-
-            tms_df.to_hdf(
-                append_to_file, key=f'tms_{tms_num}', complevel=9, format='table', nan_rep='None', append=True
-            )
-
-        else:
-            tms_df.to_hdf(
-                f'aggregated_data/fin-traffic-{delta_t}-{t_begin}-{t_end}.h5',
-                key=f'tms_{tms_num}',
-                complevel=9,
-                format='table',
-                nan_rep='None'
-            )
+        df.to_hdf(f'aggregated_data/fi_traffic_aggregated-{mintime}-{maxtime}-{delta_t}.h5', key=f'tms_{tms_num}', mode='a')
 
 
 class AggregationEngine:
@@ -308,7 +246,7 @@ def aggregate_datafiles(
         time_end = datetime.datetime(year=last_date.year, month=last_date.month, day=last_date.day, hour=0, minute=0)
     # Iterate over TMSs
     lock = multiprocessing.Lock()  # For locking data saving operations
-    pool = multiprocessing.Pool(initializer=init, initargs=(lock, ))
+    pool = multiprocessing.Pool(6, initializer=init, initargs=(lock, ))
     engine = AggregationEngine(time0, time_end, delta_t, raw_data_files, afile_to_append)
     for _ in tqdm.tqdm(pool.imap(engine, all_tms_numbers)):
         pass

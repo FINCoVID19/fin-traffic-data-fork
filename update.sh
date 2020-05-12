@@ -1,17 +1,16 @@
 #!/bin/sh
-source venv/bin/activate
 export PATH=$PWD/venv/bin:$PATH
 
-DAYBEFOREYESTERDAY=$(date -I -d "48 hours ago")
 YESTERDAY=$(date -I -d "yesterday")
+TODAY=$(date -I -d "today")
 
-fin-traffic-fetch-raw-data --begin-date ${DAYBEFOREYESTERDAY} --end-date ${YESTERDAY}
+fin-traffic-fetch-raw-data --begin-date ${YESTERDAY} --end-date ${TODAY}
 
 fin-traffic-aggregate-raw-data --time-resolution 1h
 
 rm tms_between*.h5
 
-FILENAME="aggregated_data/fin-traffic-1:00:00-2020-01-01-${YESTERDAY}.h5"
+FILENAME="aggregated_data/fin-traffic-1:00:00-2020-01-01-${TODAY}.h5"
 fin-traffic-compute-traffic-between-areas --input ${FILENAME} --area erva
 fin-traffic-compute-traffic-between-areas --input ${FILENAME} --area province
 
