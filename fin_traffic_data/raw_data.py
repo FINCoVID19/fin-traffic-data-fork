@@ -79,6 +79,7 @@ def get_tms_raw_data(ely_id:int,
             max_value=int((date_end - date_begin).days - 1),
         wrap_stdout=True)
     for i, date in enumerate(daterange(date_begin, date_end)):
+        print(f"{date}", flush=True)
         year_date0 = datetime.date(date.year, 1, 1)
         day_number = (date - year_date0).days + 1
         year_short = f"{date:%y}"
@@ -91,6 +92,7 @@ def get_tms_raw_data(ely_id:int,
             if resp.status_code in [400, 401, 402, 403, 404, 405, 406, 408, 409, 410, 411, 412, 413, 414,415, 416, 417, 418, 421, 422, 423, 424, 425, 426, 428]:
                 break
             elif resp.status_code != 200:
+                print(f"Waiting: {resp.status_code}")
                 sleep(5)
                 it+=1
             else:

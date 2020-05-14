@@ -47,13 +47,14 @@ def main():
         if df is not None:
             df.to_hdf(
                 f'raw_data/fin_traffic_raw_{args.begin_date}_{args.end_date}.h5',
+                mode='a',
                 key=f"tms_{int(tms_station.num)}",
-                complevel=9,
-                format='table',
-                nan_rep='None'
+                format='fixed',
+                nan_rep='None',
+                complib="blosc:snappy"
             )
 
-        bar.update(i)
+        bar.update(i+1)
 
 
 if __name__ == '__main__':
