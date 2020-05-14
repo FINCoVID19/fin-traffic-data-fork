@@ -98,9 +98,11 @@ def _tms_rawdata_dataframe_iterator(tms_num, raw_data_files):
     """Iterator over the dataframe and dates of datafiles for raw data of the corresponding TMS"""
     for fileinfo in raw_data_files:
         try:
+
             df = pd.read_hdf(fileinfo[0], key=f"tms_{tms_num}", mode='r')
             yield df
         except Exception as e:
+            print(fileinfo[0], tms_num)
             ...
 
 
@@ -147,9 +149,9 @@ def _aggregate_core(tms_num, mintime, maxtime, delta_t, raw_data_files, append_t
     ).groupby([pd.Grouper('time'), pd.Grouper('direction'),
                pd.Grouper('vehicle category')]).count()
     if not nodata:
-        df = empty.add(df).fillna(0)
+        df = empty.add(df).fillna(0).reset_index()
     else:
-        df = empty
+        df = empty.reset_index()
     with lock:
         df.to_hdf(f'aggregated_data/fi_traffic_aggregated-{mintime}-{maxtime}-{delta_t}.h5', key=f'tms_{tms_num}', mode='a')
 

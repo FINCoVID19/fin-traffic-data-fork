@@ -1,6 +1,7 @@
 import datetime
 from io import StringIO
 from typing import List
+from time import sleep
 
 import requests
 import pandas as pd
@@ -36,7 +37,7 @@ def _tms_raw_date_parser(*args) -> np.ndarray:
     ])
 
 
-def get_tms_raw_data(ely_id_list: List[int],
+def get_tms_raw_data(ely_id:int,
                      tms_id: int,
                      date_begin: datetime.date,
                      date_end: datetime.date,
@@ -68,38 +69,35 @@ def get_tms_raw_data(ely_id_list: List[int],
 
     or None if the TMS cannot be found in any ELY center's dataset (likely an old TMS id).
     """
-    ely_ids = ["%02d" % eid for eid in ely_id_list]
+    ely_id = "%02d" % ely_id
 
     tms_id = int(tms_id)
 
-    ely_id = None
     dfs = []
     if show_progress:
         bar = progressbar.ProgressBar(
-            max_value=int((date_end - date_begin).days - 1))
+            max_value=int((date_end - date_begin).days - 1),
+        wrap_stdout=True)
     for i, date in enumerate(daterange(date_begin, date_end)):
-
         year_date0 = datetime.date(date.year, 1, 1)
         day_number = (date - year_date0).days + 1
         year_short = f"{date:%y}"
-        try:
-            if not ely_id:
-                for possible_ely_id in ely_ids:
-                    resp = requests.get(
-                        'https://aineistot.vayla.fi/lam/rawdata/' +
-                        f'{date.year}/{possible_ely_id}/lamraw_{tms_id}_{year_short}_{day_number}.csv'
-                    )
-                    if resp.status_code == 200:
-                        ely_id = possible_ely_id
-                        break
-            if not ely_id:
-                raise RuntimeError("No ELY center has this TMS")
+        it = 0
+        while it < 3:
             resp = requests.get(
                 'https://aineistot.vayla.fi/lam/rawdata/' +
                 f'{date.year}/{ely_id}/lamraw_{tms_id}_{year_short}' +
                 f'_{day_number}.csv')
-            if resp.status_code != 200:
-                raise RuntimeError
+            if resp.status_code in [400, 401, 402, 403, 404, 405, 406, 408, 409, 410, 411, 412, 413, 414,415, 416, 417, 418, 421, 422, 423, 424, 425, 426, 428]:
+                break
+            elif resp.status_code != 200:
+                sleep(5)
+                it+=1
+            else:
+                break
+        if resp.status_code != 200:
+            print(f"Failed to fetch {date}: {tms_id}, {resp.status_code}")
+        else:
             stream = StringIO(resp.text)
             stream.seek(0)
             df = pd.read_csv(stream,
@@ -119,15 +117,8 @@ def get_tms_raw_data(ely_id_list: List[int],
                     'tms_id', 'time', 'direction', 'vehicle category'
                 ]]
                 dfs.append(df)
-        except RuntimeError as e:
-            print(f"Could not load {tms_id}, {date}")
-            if not ely_id:
-                return None
-        except Exception as e:
-            print(f"Unknown error {e}")
-        finally:
-            if show_progress:
-                bar.update(i)
+        if show_progress:
+            bar.update(i)
     if dfs:
         return pd.concat(dfs)
     else:

@@ -42,7 +42,8 @@ def main():
 
     # Load data for each TMS
     for i, tms_station in tms_stations.iterrows():
-        df = get_tms_raw_data(ely_ids, int(tms_station.num), args.begin_date, args.end_date, False)
+        ely_id = province_info.loc[int(tms_station.province)]['ely-center (traffic)']
+        df = get_tms_raw_data(ely_id, int(tms_station.num), args.begin_date, args.end_date, False)
         if df is not None:
             df.to_hdf(
                 f'raw_data/fin_traffic_raw_{args.begin_date}_{args.end_date}.h5',

@@ -43,8 +43,8 @@ def get_tms_stations() -> pd.DataFrame:
             'province': tms_province_codes,
             'dir1': tms_dir1_municipality_codes,
             'dir2': tms_dir2_municipality_codes
-        }
-    )
+        },
+         index= tms_nums)
     return df
 
 
