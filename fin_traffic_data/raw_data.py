@@ -16,6 +16,10 @@ _tms_raw_column_names = [
     'total time', 'timespan', 'queue_begin'
 ]
 
+class ResponseMock:
+
+    def __init__(self, status_code):
+        self.status_code = status_code
 
 def _tms_raw_date_parser(*args) -> np.ndarray:
     """Datetime parser for TMS raw data"""
@@ -85,10 +89,14 @@ def get_tms_raw_data(ely_id:int,
         year_short = f"{date:%y}"
         it = 0
         while it < 3:
-            resp = requests.get(
-                'https://aineistot.vayla.fi/lam/rawdata/' +
-                f'{date.year}/{ely_id}/lamraw_{tms_id}_{year_short}' +
-                f'_{day_number}.csv')
+            try:
+                resp = requests.get(
+                    'https://aineistot.vayla.fi/lam/rawdata/' +
+                    f'{date.year}/{ely_id}/lamraw_{tms_id}_{year_short}' +
+                    f'_{day_number}.csv')
+            except Exception:
+                print(f"Timeouterror: {date} {tms_id}")
+                resp = ResponseMock(499)
             if resp.status_code in [400, 401, 402, 403, 404, 405, 406, 408, 409, 410, 411, 412, 413, 414,415, 416, 417, 418, 421, 422, 423, 424, 425, 426, 428]:
                 break
             elif resp.status_code != 200:

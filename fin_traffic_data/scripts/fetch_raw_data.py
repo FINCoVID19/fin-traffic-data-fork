@@ -23,6 +23,12 @@ def main():
         help='Day past the last day of the data.',
         required=True
     )
+    parser.add_argument(
+        '--progressbar',
+        action='store_true',
+        default=False,
+        help='Shows progressbar',
+        required=False)
 
     args = parser.parse_args()
 
@@ -35,12 +41,14 @@ def main():
     # Get ids of ely-centers responsible for traffic management
     ely_ids = np.unique(province_info['ely-center (traffic)'].values)
 
-    bar = progressbar.ProgressBar(max_value=tms_stations.shape[0], redirect_stdout=True)
+    if args.progressbar:
+        bar = progressbar.ProgressBar(max_value=tms_stations.shape[0], redirect_stdout=True)
 
     # Create the output directory
     pathlib.Path("raw_data/").mkdir(parents=True, exist_ok=True)
 
     # Load data for each TMS
+    it = 0
     for i, tms_station in tms_stations.iterrows():
         ely_id = province_info.loc[int(tms_station.province)]['ely-center (traffic)']
         df = get_tms_raw_data(ely_id, int(tms_station.num), args.begin_date, args.end_date, False)
@@ -53,8 +61,9 @@ def main():
                 nan_rep='None',
                 complib="blosc:snappy"
             )
-
-        bar.update(i+1)
+        if args.progressbar:
+            it += 1
+            bar.update(it)
 
 
 if __name__ == '__main__':

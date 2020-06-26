@@ -5,8 +5,8 @@ provinceNumber,province,latitude,longitude,erva,ely-center (traffic)
 5,Kanta-Häme,60.9070,24.3005,TAYS,1
 6,Pirkanmaa,61.4978,23.761,TAYS,4
 7,Päijät-Häme,61.3230,25.7322,HYKS,1
-8,Kymenlaakso,60.7805,26.8829,HYKS,1
-9,Etelä-Karjala,61.1182,28.1024,KYS,8
+8,Kymenlaakso,60.7805,26.8829,HYKS,3
+9,Etelä-Karjala,61.1182,28.1024,KYS,3
 10,Etelä-Savo,61.6887,27.2721,KYS,8
 11,Pohjois-Savo,62.898,27.6782,KYS,8
 12,Pohjois-Karjala,62.601000000000006,29.7636,KYS,8
