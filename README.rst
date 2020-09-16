@@ -37,7 +37,7 @@ Pre-existing raw traffic data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You can download a pre-existing raw traffic data (2020-01-01 - 2020-09-16) from
-`Pouta <https://a3s.fi/swift/v1/AUTH_907c4d6d08d84f9a955ce27fe6142447/fin-traffic/raw_data_2020-01-01_2020-09-16.tar`_.
+`Pouta <https://a3s.fi/swift/v1/AUTH_907c4d6d08d84f9a955ce27fe6142447/fin-traffic/raw_data_2020-01-01_2020-09-16.tar>`_.
 
 Aggregating raw data
 --------------------
