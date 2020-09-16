@@ -33,6 +33,11 @@ pandas dataframes with the filenaming convention `fin_traffic_raw_<begin-date>_<
 The output file contains the raw traffic data for each TMS in a dataset called
 `tms_<tms id>`.
 
+Pre-existing raw traffic data
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can download a pre-existing raw traffic data (2020-01-01 - 2020-09-16) from
+`Pouta <https://a3s.fi/swift/v1/AUTH_907c4d6d08d84f9a955ce27fe6142447/fin-traffic/raw_data_2020-01-01_2020-09-16.tar`_.
 
 Aggregating raw data
 --------------------
@@ -40,7 +45,7 @@ Aggregating raw data
 The console script `fin-traffic-aggregate-raw-data` allows you the aggregate pre-fetched
 traffic data. Usage::
     
-    fin-traffic-aggregate-raw-data --dir data/ --time-resolution 1h
+    fin-traffic-aggregate-raw-data --dir raw_data/ --time-resolution 1h
 
 Here the options are
 
@@ -52,5 +57,27 @@ Here the options are
     `d` for days, and `h` for hours.
 
 The script spits out a file named 
-`fin_traffic_aggregated_<begin-date>_<end-date>_<time-resolution>.pd.h5`.
+`fin_traffic_aggregated_<begin-date>_<end-date>_<time-resolution>.h5`.
+
+
+Computing traffic between provinces and university hospital catchment areas
+---------------------------------------------------------------------------
+
+The console script `fin-traffic-compute-traffic-between-areas` can be used to compute 
+traffic between different regions. For computing traffic between provinces, use the command::
+
+    fin-traffic-compute-traffic-between-areas --area province --input aggregated_data/fi_traffic_aggregated-2020-01-01 00:00:00-2020-09-16 00:00:00-1:00:00.h5
+
+For traffic between university hospital catchment areas, use the flag `--area erva`. This tool spits out a file named
+`tms_between_ervas.h5` or `tms_between_provinces.h5`.
+
+
+Converting province/ERVA level traffic to CSV format
+----------------------------------------------------
+
+For converting province/ERVA level traffic to a compressed archive of CSV-files, use the command::
+
+    fin-traffic-export-traffic-between-areas-to-csv --area erva
+
+This requires the file `tms_between_ervas.h5` and outputs the archive `tms_between_ervas.tar.bz2`.
 
