@@ -33,12 +33,6 @@ pandas dataframes with the filenaming convention `fin_traffic_raw_<begin-date>_<
 The output file contains the raw traffic data for each TMS in a dataset called
 `tms_<tms id>`.
 
-Pre-existing raw traffic data
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-You can download a pre-existing raw traffic data (2020-01-01 - 2020-09-16) from
-`Allas container fin-traffic <https://docs.csc.fi/data/Allas/>`_
-
 Aggregating raw data
 --------------------
 
