@@ -2,6 +2,7 @@
 
 import fin_traffic_data as my_pkg
 from setuptools import setup, find_packages, Command
+import glob
 import os
 import subprocess
 import re
@@ -49,7 +50,6 @@ setup(
     cmdclass={
         'mypy': MypyCommand,
     },
-    data_files=[],
     description="Fetching and aggregation of traffic data from Finnish roads",
     entry_points={
         'console_scripts': [
@@ -63,6 +63,10 @@ setup(
     license=my_pkg.__license__,
     long_description=read('README.rst'),
     packages=find_packages(),
+    package_data={
+        '': ['data/*.csv',
+             'data/*.json']},
+    include_package_data=True,
     python_requires='>=3.7',
     test_suite='nose2.collector.collector',
     tests_require=['nose2', 'mypy'],
