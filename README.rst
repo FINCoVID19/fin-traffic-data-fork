@@ -11,6 +11,11 @@ Python package for:
 4. visualizing the aggregated data.
 
 
+Disclaimer
+------------
+This repo is forked from the original work by Janne Solanpaa/ See the repository `here <https://gitlab.com/solanpaa/fin-traffic-data>`_
+
+
 Installation
 ------------
 
