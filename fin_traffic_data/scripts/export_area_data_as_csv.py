@@ -13,12 +13,15 @@ import pandas as pd
 class Area(Enum):
     PROVINCE = "province"
     ERVA = "erva"
+    HCD = "hcd"
 
     def __str__(self):
         if self is Area.PROVINCE:
             return "province"
-        else:
+        elif self is Area.ERVA:
             return "erva"
+        else:
+            return "hcd"
 
 
 def main():
@@ -38,6 +41,8 @@ def main():
         inputpath = 'tms_between_ervas.h5'
     elif area is Area.PROVINCE:
         inputpath = 'tms_between_provinces.h5'
+    elif area is Area.HCD:
+        inputpath = 'tms_between_hcds.h5'
     outputpath = inputpath.split('.')[0] + ".tar.bz2"
 
     with h5py.File(inputpath, 'r') as hf:
