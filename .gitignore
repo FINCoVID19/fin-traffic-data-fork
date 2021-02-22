@@ -1,3 +1,11 @@
+# Ignore out files of the scripts
+*.h5
+*.bz2
+tms_between_hcds
+
+# Ignore MAC files
+.DS_Store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
