@@ -13,7 +13,7 @@ Python package for:
 
 Disclaimer
 ------------
-This repo is forked from the original work by Janne Solanpaa. See the repository `here <https://gitlab.com/solanpaa/fin-traffic-data>`_
+This repo is forked from the original work by Janne Solanpää. See the repository `here <https://gitlab.com/solanpaa/fin-traffic-data>`_
 
 
 Installation
