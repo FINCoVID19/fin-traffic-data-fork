@@ -96,6 +96,18 @@ def get_erva_info() -> pd.DataFrame:
     return df
 
 
+def get_hcd_info() -> pd.DataFrame:
+    """
+    Returns the coordinates of each erva
+
+    Returns
+    -------
+    pandas.DataFrame
+    """
+    df = pd.read_csv(os.path.dirname(__file__) + '/data/hcd_info.csv', index_col=[0])
+    return df
+
+
 def get_neighbouring_municipalities_map() -> Dict:
     """
     Returns a map from municipality name to a list of its neighbours.
@@ -123,4 +135,13 @@ def get_tms_over_erva_borders() -> pd.DataFrame:
     between ERVAs.
     """
     df = pd.read_csv(os.path.dirname(__file__) + '/data/tms_over_erva_borders.csv')
+    return df
+
+
+def get_tms_over_hcd_borders() -> pd.DataFrame:
+    """
+    Returns a dataframe of TMS stations and the measurement directions
+    between HCDs.
+    """
+    df = pd.read_csv(os.path.dirname(__file__) + '/data/tms_over_hcd_borders.csv')
     return df

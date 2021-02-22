@@ -14,12 +14,15 @@ from fin_traffic_data.metadata import *
 class Area(Enum):
     PROVINCE = "province"
     ERVA = "erva"
+    HCD = "hcd"
 
     def __str__(self):
         if self is Area.PROVINCE:
             return "province"
-        else:
+        elif self is Area.ERVA:
             return "erva"
+        else:
+            return "hcd"
 
 
 def main():
@@ -42,6 +45,8 @@ def main():
         tms_over_area_borders = get_tms_over_province_borders()
     elif area is Area.ERVA:
         tms_over_area_borders = get_tms_over_erva_borders()
+    elif area is Area.HCD:
+        tms_over_area_borders = get_tms_over_hcd_borders()
 
     # Instantiate the directed graph
     G = nx.DiGraph()
@@ -75,6 +80,9 @@ def main():
         coordinate_map = dict([(row['province'], row[['longitude', 'latitude']]) for key, row in data.iterrows()])
     elif area == Area.ERVA:
         data = get_erva_info()
+        coordinate_map = dict([(key, row[['longitude', 'latitude']]) for key, row in data.iterrows()])
+    elif area == Area.HCD:
+        data = get_hcd_info()
         coordinate_map = dict([(key, row[['longitude', 'latitude']]) for key, row in data.iterrows()])
 
     nx.draw_networkx(G, pos=coordinate_map)
