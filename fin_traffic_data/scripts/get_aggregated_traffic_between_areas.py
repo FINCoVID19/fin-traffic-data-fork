@@ -1,13 +1,14 @@
 import argparse
 from enum import Enum, unique
-from glob import glob
-
 import pandas as pd
-import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 
-from fin_traffic_data.metadata import *
+from fin_traffic_data.metadata import (
+    get_tms_over_province_borders, get_tms_over_erva_borders,
+    get_tms_over_hcd_borders, get_province_info, get_erva_info,
+    get_hcd_info
+)
 
 
 @unique
@@ -52,8 +53,6 @@ def main():
     G = nx.DiGraph()
 
     # Read
-    _tmp = pd.read_hdf(inputfile, key='tms_3')
-    times = np.unique(_tmp['time'])
     for _, row in tms_over_area_borders.iterrows():
         tms_infos = [tuple(v.split(',')) for v in row['tms'].split(';')]
         G.add_edge(row['source'], row['destination'], tms=tms_infos)
@@ -85,8 +84,9 @@ def main():
         data = get_hcd_info()
         coordinate_map = dict([(key, row[['longitude', 'latitude']]) for key, row in data.iterrows()])
 
-    nx.draw_networkx(G, pos=coordinate_map)
-    plt.show()
+    if(visualization_enabled):
+        nx.draw_networkx(G, pos=coordinate_map)
+        plt.show()
 
 
 if __name__ == '__main__':

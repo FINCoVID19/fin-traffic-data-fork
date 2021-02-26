@@ -1,6 +1,5 @@
 import argparse
 from enum import Enum, unique
-import pathlib
 import tarfile
 from io import BytesIO
 import codecs

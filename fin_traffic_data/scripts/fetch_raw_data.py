@@ -1,12 +1,10 @@
 import argparse
-from datetime import date
+import datetime
 import pathlib
-
 import progressbar
-
-from fin_traffic_data.metadata import *
-from fin_traffic_data.raw_data import *
-from fin_traffic_data.utils import daterange
+import numpy as np
+from fin_traffic_data.metadata import get_tms_stations, get_province_info
+from fin_traffic_data.raw_data import get_tms_raw_data
 
 
 def main():
@@ -49,14 +47,17 @@ def main():
 
     # Load data for each TMS
     it = 0
-    for i, tms_station in tms_stations.iterrows():
-        ely_id = province_info.loc[int(tms_station.province)]['ely-center (traffic)']
-        df = get_tms_raw_data(ely_id, int(tms_station.num), args.begin_date, args.end_date, False)
+    tms_stations_list = tms_stations.values.tolist()
+    for tms_station in tms_stations_list:
+        province = int(tms_station[5])
+        num = int(tms_station[1])
+        ely_id = province_info.loc[province]['ely-center (traffic)']
+        df = get_tms_raw_data(ely_id, num, args.begin_date, args.end_date, False)
         if df is not None:
             df.to_hdf(
                 f'raw_data/fin_traffic_raw_{args.begin_date}_{args.end_date}.h5',
                 mode='a',
-                key=f"tms_{int(tms_station.num)}",
+                key=f"tms_{num}",
                 format='fixed',
                 nan_rep='None',
                 complib="blosc:snappy"

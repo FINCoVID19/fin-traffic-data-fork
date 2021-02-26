@@ -1,8 +1,7 @@
 import json
 import requests
 import pandas as pd
-from typing import Dict, Text, Tuple
-import numpy as np
+from typing import Dict
 import os.path
 
 
@@ -33,8 +32,7 @@ def get_tms_stations() -> pd.DataFrame:
     tms_dir1_municipality_codes = [tms['properties']['direction1MunicipalityCode'] for tms in data]
     tms_dir2_municipality_codes = [tms['properties']['direction2MunicipalityCode'] for tms in data]
 
-    df = pd.DataFrame(
-        {
+    df = pd.DataFrame({
             'id': tms_ids,
             'num': tms_nums,
             'latitude': tms_latitude,
@@ -44,7 +42,8 @@ def get_tms_stations() -> pd.DataFrame:
             'dir1': tms_dir1_municipality_codes,
             'dir2': tms_dir2_municipality_codes
         },
-         index= tms_nums)
+        index=tms_nums)
+
     return df
 
 

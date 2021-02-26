@@ -1,6 +1,5 @@
 import datetime
 from io import StringIO
-from typing import List
 from time import sleep
 
 import requests
@@ -16,10 +15,12 @@ _tms_raw_column_names = [
     'total time', 'timespan', 'queue_begin'
 ]
 
+
 class ResponseMock:
 
     def __init__(self, status_code):
         self.status_code = status_code
+
 
 def _tms_raw_date_parser(*args) -> np.ndarray:
     """Datetime parser for TMS raw data"""
@@ -41,7 +42,7 @@ def _tms_raw_date_parser(*args) -> np.ndarray:
     ])
 
 
-def get_tms_raw_data(ely_id:int,
+def get_tms_raw_data(ely_id: int,
                      tms_id: int,
                      date_begin: datetime.date,
                      date_end: datetime.date,
@@ -81,7 +82,7 @@ def get_tms_raw_data(ely_id:int,
     if show_progress:
         bar = progressbar.ProgressBar(
             max_value=int((date_end - date_begin).days - 1),
-        wrap_stdout=True)
+            wrap_stdout=True)
     for i, date in enumerate(daterange(date_begin, date_end)):
         print(f"{date}", flush=True)
         year_date0 = datetime.date(date.year, 1, 1)
@@ -102,7 +103,7 @@ def get_tms_raw_data(ely_id:int,
             elif resp.status_code != 200:
                 print(f"Waiting: {resp.status_code}")
                 sleep(5)
-                it+=1
+                it += 1
             else:
                 break
         if resp.status_code != 200:

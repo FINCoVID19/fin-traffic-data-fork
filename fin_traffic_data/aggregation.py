@@ -1,6 +1,4 @@
-import argparse
 import datetime
-from functools import reduce
 from glob import glob
 import itertools
 import multiprocessing
@@ -10,10 +8,10 @@ import pathlib
 
 import pandas as pd
 import numpy as np
-import progressbar
 import tqdm
 
-from fin_traffic_data.utils import *
+from fin_traffic_data.utils import (daterange, compute_daterange_overlap,
+                                    datetimerange)
 
 # Info on TMS data
 _vehicle_categories = [1, 2, 3, 4, 5, 6, 7]
@@ -101,7 +99,7 @@ def _tms_rawdata_dataframe_iterator(tms_num, raw_data_files):
 
             df = pd.read_hdf(fileinfo[0], key=f"tms_{tms_num}", mode='r')
             yield df
-        except Exception as e:
+        except Exception:
             print(fileinfo[0], tms_num)
             ...
 
@@ -140,7 +138,6 @@ def _aggregate_core(tms_num, mintime, maxtime, delta_t, raw_data_files, append_t
                 pd.Grouper('vehicle category')
             ]
         ).count()
-
 
     times = [i[0] for i in datetimerange(mintime, maxtime, delta_t)]
     empty = pd.DataFrame(
