@@ -41,13 +41,18 @@ def main():
                         required=True,
                         help="Time resolution of the aggregation")
 
+    parser.add_argument("--results_dir", "-rd",
+                        type=str,
+                        default='aggregated_data',
+                        help="Name of the directory to store the results.")
+
     args = parser.parse_args()
 
     basepath = args.dir
     delta_t = args.time_resolution
 
     # Create the output directory
-    pathlib.Path("aggregated_data/").mkdir(parents=True, exist_ok=True)
+    pathlib.Path(args.results_dir).mkdir(parents=True, exist_ok=True)
 
     # Get the raw datafiles
     raw_data_files = list_rawdata_files(basepath)
@@ -63,9 +68,10 @@ def main():
 
     # Aggregate all the datafiles
     aggregate_datafiles(
-        raw_data_files,
-        all_tms_stations['num'],
-        delta_t
+        raw_data_files=raw_data_files,
+        all_tms_numbers=all_tms_stations['num'],
+        delta_t=delta_t,
+        results_dir=args.results_dir
     )
 
 

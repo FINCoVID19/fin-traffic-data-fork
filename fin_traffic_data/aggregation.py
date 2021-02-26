@@ -5,7 +5,7 @@ import multiprocessing
 import re
 from typing import List, Text, Tuple
 import pathlib
-
+import os
 import pandas as pd
 import numpy as np
 import tqdm
@@ -104,7 +104,8 @@ def _tms_rawdata_dataframe_iterator(tms_num, raw_data_files):
             ...
 
 
-def _aggregate_core(tms_num, mintime, maxtime, delta_t, raw_data_files, append_to_file) -> pd.DataFrame:
+def _aggregate_core(tms_num, mintime, maxtime, delta_t, raw_data_files,
+                    append_to_file, results_dir) -> pd.DataFrame:
     """
     Aggregates all data on the TMS between two datetimes
 
@@ -150,14 +151,17 @@ def _aggregate_core(tms_num, mintime, maxtime, delta_t, raw_data_files, append_t
     else:
         df = empty.reset_index()
     with lock:
-        df.to_hdf(f'aggregated_data/fi_traffic_aggregated-{mintime}-{maxtime}-{delta_t}.h5', key=f'tms_{tms_num}', mode='a')
+        file_name = f'fi_traffic_aggregated-{mintime}-{maxtime}-{delta_t}.h5'
+        result_path = os.path.join(results_dir, file_name)
+        df.to_hdf(result_path, key=f'tms_{tms_num}', mode='a')
 
 
 class AggregationEngine:
 
     """Class for aggregating the raw data in a multiprocessing environment."""
 
-    def __init__(self, time0, time_end, delta_t, raw_data_files, append_to_file):
+    def __init__(self, time0, time_end, delta_t, raw_data_files,
+                 append_to_file, results_dir):
         """
         Input
         -----
@@ -175,6 +179,7 @@ class AggregationEngine:
         self.delta_t = delta_t
         self.raw_data_files = raw_data_files
         self.append_to_file = append_to_file
+        self.results_dir = results_dir
 
     def __call__(self, tms_num):
         """
@@ -185,7 +190,13 @@ class AggregationEngine:
         tms_num: int
             Number of the TMS station
         """
-        _aggregate_core(tms_num, self.time0, self.time_end, self.delta_t, self.raw_data_files, self.append_to_file)
+        _aggregate_core(tms_num=tms_num,
+                        mintime=self.time0,
+                        maxtime=self.time_end,
+                        delta_t=self.delta_t,
+                        raw_data_files=self.raw_data_files,
+                        append_to_file=self.append_to_file,
+                        results_dir=self.results_dir)
 
 
 def init(arg_lock):
@@ -196,18 +207,21 @@ def init(arg_lock):
 
 
 def aggregate_datafiles(
-        raw_data_files: List[Tuple[Text, datetime.date, datetime.date]], all_tms_numbers: List[int],
-        delta_t: datetime.timedelta
-) -> pd.DataFrame:
+        raw_data_files: List[Tuple[Text, datetime.date, datetime.date]],
+        all_tms_numbers: List[int],
+        delta_t: datetime.timedelta,
+        results_dir: str) -> pd.DataFrame:
 
     # Check if there is an existing aggregated datafile with the same resolution
 
     try:
-        aggregate_files = glob(f'aggregated_data/fin-traffic-{delta_t}-*.h5')
+        file_name_glob = 'fin-traffic-%s-*.h5' % (delta_t, )
+        result_path_glob = os.path.join(results_dir, file_name_glob)
+        aggregate_files = glob(result_path_glob)
 
         def get_daterange(afilename):
             m = re.match(
-                r"aggregated_data\/fin-traffic-" + f"{delta_t}" +
+                f"{results_dir}" + r"\/fin-traffic-" + f"{delta_t}" +
                 r"-(?P<begindate>\d{4}-\d{2}-\d{2})(\s00:00:00)?-(?P<enddate>\d{4}-\d{2}-\d{2})(\s00:00:00)?\.h5",
                 afilename
             )
@@ -238,7 +252,8 @@ def aggregate_datafiles(
         )
         time_end = datetime.datetime(year=last_date.year, month=last_date.month, day=last_date.day, hour=0, minute=0)
         date_end = datetime.date(year=last_date.year, month=last_date.month, day=last_date.day)
-        new_filename = f'aggregated_data/fin-traffic-{delta_t}-{afile_firstday}-{date_end}.h5'
+        new_filename = 'fin-traffic-{delta_t}-{afile_firstday}-{date_end}.h5'
+        result_path = os.path.join(results_dir, new_filename)
     except Exception:
         afile_to_append = None
         time0 = datetime.datetime(year=first_date.year, month=first_date.month, day=first_date.day, hour=0, minute=0)
@@ -246,9 +261,14 @@ def aggregate_datafiles(
     # Iterate over TMSs
     lock = multiprocessing.Lock()  # For locking data saving operations
     pool = multiprocessing.Pool(6, initializer=init, initargs=(lock, ))
-    engine = AggregationEngine(time0, time_end, delta_t, raw_data_files, afile_to_append)
+    engine = AggregationEngine(time0=time0,
+                               time_end=time_end,
+                               delta_t=delta_t,
+                               raw_data_files=raw_data_files,
+                               append_to_file=afile_to_append,
+                               results_dir=results_dir)
     for _ in tqdm.tqdm(pool.imap(engine, all_tms_numbers)):
         pass
     if afile_to_append:
         path = pathlib.Path(afile_to_append)
-        path.replace(new_filename)
+        path.replace(result_path)

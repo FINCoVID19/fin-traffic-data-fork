@@ -2,7 +2,7 @@ import argparse
 import datetime
 import pathlib
 import progressbar
-import numpy as np
+import os
 from fin_traffic_data.metadata import get_tms_stations, get_province_info
 from fin_traffic_data.raw_data import get_tms_raw_data
 
@@ -56,8 +56,11 @@ def main():
         ely_id = province_info.loc[province]['ely-center (traffic)']
         df = get_tms_raw_data(ely_id, num, args.begin_date, args.end_date, False)
         if df is not None:
+            file_name = 'fin_traffic_raw_%s_%s.h5' % (args.begin_date,
+                                                      args.end_date)
+            result_path = os.path.join(args.results_dir, file_name)
             df.to_hdf(
-                f'raw_data/fin_traffic_raw_{args.begin_date}_{args.end_date}.h5',
+                result_path,
                 mode='a',
                 key=f"tms_{num}",
                 format='fixed',
