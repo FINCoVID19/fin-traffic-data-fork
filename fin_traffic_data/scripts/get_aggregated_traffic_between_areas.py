@@ -1,3 +1,5 @@
+import os
+import pathlib
 import argparse
 from enum import Enum, unique
 import pandas as pd
@@ -32,9 +34,20 @@ def main():
         description="Collects and aggregates the aggregated TMS data for traffic between provinces or ERVAs."
     )
 
-    parser.add_argument("--input", required=True, help="Path to the aggregated_data input-file")
-    parser.add_argument("--visualize", action='store_true', help="Visualizes the province/ERVA graph.")
-    parser.add_argument("--area", type=Area, required=True, help="Whether to collect erva or province-level data.")
+    parser.add_argument("--input",
+                        required=True,
+                        help="Path to the aggregated_data input-file")
+    parser.add_argument("--visualize",
+                        action='store_true',
+                        help="Visualizes the province/ERVA graph.")
+    parser.add_argument("--area",
+                        type=Area,
+                        required=True,
+                        help="Whether to collect erva or province-level data.")
+    parser.add_argument("--results_dir", "-rd",
+                        type=str,
+                        default='aggregated_data',
+                        help="Name of the directory to store the results.")
 
     args = parser.parse_args()
     inputfile = args.input
@@ -48,6 +61,9 @@ def main():
         tms_over_area_borders = get_tms_over_erva_borders()
     elif area is Area.HCD:
         tms_over_area_borders = get_tms_over_hcd_borders()
+
+    # Create the output directory
+    pathlib.Path(args.results_dir).mkdir(parents=True, exist_ok=True)
 
     # Instantiate the directed graph
     G = nx.DiGraph()
@@ -71,7 +87,13 @@ def main():
         cols.remove('index')
         cols.remove('direction')
         df = df[cols]
-        df.to_hdf(f'tms_between_{area}s.h5', key=f"{row['source']}:{row['destination']}", complevel=9, format='table')
+        file_name = 'tms_between_%ss_input_%s.h5' % (area,
+                                                     inputfile.split('/')[-1])
+        result_path = os.path.join(args.results_dir, file_name)
+        df.to_hdf(result_path,
+                  key=f"{row['source']}:{row['destination']}",
+                  complevel=9,
+                  format='table')
 
     # Create map of areaName -> (longitude, latitude)
     if area == Area.PROVINCE:
