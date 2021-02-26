@@ -67,7 +67,7 @@ setup(
         '': ['data/*.csv',
              'data/*.json']},
     include_package_data=True,
-    python_requires='>=3.7',
+    python_requires='>=3.6',
     test_suite='nose2.collector.collector',
     tests_require=['nose2', 'mypy'],
     url='https://www.solanpaa.fi',
