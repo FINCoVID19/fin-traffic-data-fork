@@ -3,6 +3,7 @@ from enum import Enum, unique
 import tarfile
 from io import BytesIO
 import codecs
+import os
 
 import h5py
 import pandas as pd
@@ -33,15 +34,16 @@ def main():
         )
     )
 
-    parser.add_argument("--area", type=Area, required=True, help="Whether to collect erva or province-level data.")
+    parser.add_argument("--input",
+                        required=True,
+                        help="Path to the aggregated_data by area input-file")
     args = parser.parse_args()
-    area = args.area
-    if area is Area.ERVA:
-        inputpath = 'tms_between_ervas.h5'
-    elif area is Area.PROVINCE:
-        inputpath = 'tms_between_provinces.h5'
-    elif area is Area.HCD:
-        inputpath = 'tms_between_hcds.h5'
+
+    inputpath = args.input
+    # Get only the filename
+    input_file = os.path.basename(inputpath)
+    # Remove the extension
+    input_file = input_file.split('.')[0]
     outputpath = inputpath.split('.')[0] + ".tar.bz2"
 
     with h5py.File(inputpath, 'r') as hf:
@@ -53,7 +55,7 @@ def main():
                 writer_wrapper = codecs.getwriter('utf-8')(fileobj)
                 df = pd.read_hdf(inputpath, key=key)
                 df.to_csv(writer_wrapper)
-                filename = inputpath.split('.')[0] + "/" + key + '.csv'
+                filename = input_file + "/" + key + '.csv'
                 tinfo = tarfile.TarInfo(filename)
                 tinfo.size = fileobj.tell()
                 fileobj.seek(0)

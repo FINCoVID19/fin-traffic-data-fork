@@ -87,8 +87,9 @@ def main():
         cols.remove('index')
         cols.remove('direction')
         df = df[cols]
+        input_filename = inputfile.split('/')[-1]
         file_name = 'tms_between_%ss_input_%s.h5' % (area,
-                                                     inputfile.split('/')[-1])
+                                                     input_filename.split('.')[0])
         result_path = os.path.join(args.results_dir, file_name)
         df.to_hdf(result_path,
                   key=f"{row['source']}:{row['destination']}",
