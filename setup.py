@@ -2,11 +2,7 @@
 
 import fin_traffic_data as my_pkg
 from setuptools import setup, find_packages, Command
-import glob
 import os
-import subprocess
-import re
-import sys
 
 
 def read(fname):

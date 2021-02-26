@@ -1,4 +1,5 @@
 import os
+import sys
 import pathlib
 import argparse
 from enum import Enum, unique
@@ -28,33 +29,9 @@ class Area(Enum):
             return "hcd"
 
 
-def main():
-
-    parser = argparse.ArgumentParser(
-        description="Collects and aggregates the aggregated TMS data for traffic between provinces or ERVAs."
-    )
-
-    parser.add_argument("--input",
-                        required=True,
-                        help="Path to the aggregated_data input-file")
-    parser.add_argument("--visualize",
-                        action='store_true',
-                        help="Visualizes the province/ERVA graph.")
-    parser.add_argument("--area",
-                        type=Area,
-                        required=True,
-                        help="Whether to collect erva or province-level data.")
-    parser.add_argument("--results_dir", "-rd",
-                        type=str,
-                        default='aggregated_data',
-                        help="Name of the directory to store the results.")
-
-    args = parser.parse_args()
-    inputfile = args.input
-    visualization_enabled = args.visualize
-
+def get_aggregated_traffic_between_areas(inputfile, area,
+                                         visualization_enabled, results_dir):
     # Select ERVA / province
-    area = args.area
     if area is Area.PROVINCE:
         tms_over_area_borders = get_tms_over_province_borders()
     elif area is Area.ERVA:
@@ -63,7 +40,7 @@ def main():
         tms_over_area_borders = get_tms_over_hcd_borders()
 
     # Create the output directory
-    pathlib.Path(args.results_dir).mkdir(parents=True, exist_ok=True)
+    pathlib.Path(results_dir).mkdir(parents=True, exist_ok=True)
 
     # Instantiate the directed graph
     G = nx.DiGraph()
@@ -90,7 +67,7 @@ def main():
         input_filename = inputfile.split('/')[-1]
         file_name = 'tms_between_%ss_input_%s.h5' % (area,
                                                      input_filename.split('.')[0])
-        result_path = os.path.join(args.results_dir, file_name)
+        result_path = os.path.join(results_dir, file_name)
         df.to_hdf(result_path,
                   key=f"{row['source']}:{row['destination']}",
                   complevel=9,
@@ -110,6 +87,40 @@ def main():
     if(visualization_enabled):
         nx.draw_networkx(G, pos=coordinate_map)
         plt.show()
+
+    return result_path
+
+
+# Parse script arguments
+def parse_args(args=sys.argv[1:]):
+    parser = argparse.ArgumentParser(
+        description="Collects and aggregates the aggregated TMS data for traffic between provinces or ERVAs."
+    )
+
+    parser.add_argument("--input",
+                        required=True,
+                        help="Path to the aggregated_data input-file")
+    parser.add_argument("--visualize",
+                        action='store_true',
+                        help="Visualizes the province/ERVA graph.")
+    parser.add_argument("--area",
+                        type=Area,
+                        required=True,
+                        help="Whether to collect erva or province-level data.")
+    parser.add_argument("--results_dir", "-rd",
+                        type=str,
+                        default='aggregated_data',
+                        help="Name of the directory to store the results.")
+
+    return parser.parse_args(args)
+
+
+def main():
+    args = parse_args()
+    get_aggregated_traffic_between_areas(inputfile=args.input,
+                                         area=args.area,
+                                         visualization_enabled=args.visualize,
+                                         results_dir=args.results_dir)
 
 
 if __name__ == '__main__':

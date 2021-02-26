@@ -1,12 +1,12 @@
-import argparse
-from enum import Enum, unique
-import tarfile
-from io import BytesIO
-import codecs
 import os
-
+import sys
+from io import BytesIO
+import tarfile
+import argparse
+import codecs
 import h5py
 import pandas as pd
+from enum import Enum, unique
 
 
 @unique
@@ -24,22 +24,7 @@ class Area(Enum):
             return "hcd"
 
 
-def main():
-
-    parser = argparse.ArgumentParser(
-        description=(
-            "Converts the aggregated TMS data for traffic between provinces or ERVAs to CSV form inside"
-            "a bzipped tar-archive. For ERVAs,"
-            "expects the input to be 'tms_between_ervas.h5'; for provinces 'tms_between_provinces.h5'"
-        )
-    )
-
-    parser.add_argument("--input",
-                        required=True,
-                        help="Path to the aggregated_data by area input-file")
-    args = parser.parse_args()
-
-    inputpath = args.input
+def export_area_data_as_csv(inputpath):
     # Get only the filename
     input_file = os.path.basename(inputpath)
     # Remove the extension
@@ -60,6 +45,30 @@ def main():
                 tinfo.size = fileobj.tell()
                 fileobj.seek(0)
                 tfile.addfile(tinfo, fileobj=fileobj)
+
+    return outputpath
+
+
+# Parse script arguments
+def parse_args(args=sys.argv[1:]):
+    parser = argparse.ArgumentParser(
+        description=(
+            "Converts the aggregated TMS data for traffic between provinces or ERVAs to CSV form inside"
+            "a bzipped tar-archive. For ERVAs,"
+            "expects the input to be 'tms_between_ervas.h5'; for provinces 'tms_between_provinces.h5'"
+        )
+    )
+
+    parser.add_argument("--input",
+                        required=True,
+                        help="Path to the aggregated_data by area input-file")
+
+    return parser.parse_args(args)
+
+
+def main():
+    args = parse_args()
+    export_area_data_as_csv(inputpath=args.input)
 
 
 if __name__ == '__main__':

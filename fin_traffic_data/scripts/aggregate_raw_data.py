@@ -1,8 +1,8 @@
-import argparse
-from datetime import timedelta
-import pathlib
+import sys
 import re
-
+import pathlib
+from datetime import timedelta
+import argparse
 from fin_traffic_data.metadata import get_tms_stations
 from fin_traffic_data.aggregation import (
     list_rawdata_files, check_no_daterange_overlap_in_raw_files,
@@ -30,29 +30,9 @@ def _parse_time_resolution(x):
     return dt
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Aggregates pre-loaded raw traffic data.")
-    parser.add_argument("--dir", type=str,
-                        help="Directory containing the raw traffic data",
-                        default="raw_data")
-
-    parser.add_argument("--time-resolution", type=_parse_time_resolution,
-                        required=True,
-                        help="Time resolution of the aggregation")
-
-    parser.add_argument("--results_dir", "-rd",
-                        type=str,
-                        default='aggregated_data',
-                        help="Name of the directory to store the results.")
-
-    args = parser.parse_args()
-
-    basepath = args.dir
-    delta_t = args.time_resolution
-
+def aggregate_raw_data(basepath, delta_t, results_dir):
     # Create the output directory
-    pathlib.Path(args.results_dir).mkdir(parents=True, exist_ok=True)
+    pathlib.Path(results_dir).mkdir(parents=True, exist_ok=True)
 
     # Get the raw datafiles
     raw_data_files = list_rawdata_files(basepath)
@@ -71,8 +51,37 @@ def main():
         raw_data_files=raw_data_files,
         all_tms_numbers=all_tms_stations['num'],
         delta_t=delta_t,
-        results_dir=args.results_dir
+        results_dir=results_dir
     )
+
+    return results_dir
+
+
+# Parse script arguments
+def parse_args(args=sys.argv[1:]):
+    parser = argparse.ArgumentParser(
+        description="Aggregates pre-loaded raw traffic data.")
+    parser.add_argument("--dir", type=str,
+                        help="Directory containing the raw traffic data",
+                        default="raw_data")
+
+    parser.add_argument("--time-resolution", type=_parse_time_resolution,
+                        required=True,
+                        help="Time resolution of the aggregation")
+
+    parser.add_argument("--results_dir", "-rd",
+                        type=str,
+                        default='aggregated_data',
+                        help="Name of the directory to store the results.")
+
+    return parser.parse_args(args)
+
+
+def main():
+    args = parse_args()
+    aggregate_raw_data(basepath=args.dir,
+                       delta_t=args.time_resolution,
+                       results_dir=args.results_dir)
 
 
 if __name__ == '__main__':
