@@ -28,6 +28,11 @@ def main():
         help='Shows progressbar',
         required=False)
 
+    parser.add_argument("--results_dir", "-rd",
+                        type=str,
+                        default='raw_data',
+                        help="Name of the directory to store the results.")
+
     args = parser.parse_args()
 
     # Get info on available TMS stations
@@ -36,14 +41,11 @@ def main():
     # Get info on provinces
     province_info = get_province_info()
 
-    # Get ids of ely-centers responsible for traffic management
-    ely_ids = np.unique(province_info['ely-center (traffic)'].values)
-
     if args.progressbar:
         bar = progressbar.ProgressBar(max_value=tms_stations.shape[0], redirect_stdout=True)
 
     # Create the output directory
-    pathlib.Path("raw_data/").mkdir(parents=True, exist_ok=True)
+    pathlib.Path(args.results_dir).mkdir(parents=True, exist_ok=True)
 
     # Load data for each TMS
     it = 0

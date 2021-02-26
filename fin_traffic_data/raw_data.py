@@ -84,7 +84,7 @@ def get_tms_raw_data(ely_id: int,
             max_value=int((date_end - date_begin).days - 1),
             wrap_stdout=True)
     for i, date in enumerate(daterange(date_begin, date_end)):
-        print(f"{date}", flush=True)
+        print("TMS ID: %s - %s" % (tms_id, date), flush=True)
         year_date0 = datetime.date(date.year, 1, 1)
         day_number = (date - year_date0).days + 1
         year_short = f"{date:%y}"
