@@ -59,7 +59,7 @@ setup(
     },
     install_requires=get_requirements(),
     license=my_pkg.__license__,
-    long_description=read('README.rst'),
+    long_description=read('README.md'),
     packages=find_packages(),
     package_data={
         '': ['data/*.csv',

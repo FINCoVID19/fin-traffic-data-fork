@@ -71,7 +71,8 @@ The console script `fin-traffic-compute-traffic-between-areas` can be used to co
 traffic between different regions. For computing traffic between provinces, use the command::
 
 ```sh
-fin-traffic-compute-traffic-between-areas --area <area> --input aggregated_data/fi_traffic_aggregated-2020-01-01 00:00:00-2020-09-16 00:00:00-1:00:00.h5
+fin-traffic-compute-traffic-between-areas --area <area> \
+--input aggregated_data/fi_traffic_aggregated-2020-01-01 00:00:00-2020-09-16 00:00:00-1:00:00.h5
 ```
 
 For the parameter `<area>` there are 3 possible choices:
@@ -96,13 +97,21 @@ This requires the file `tms_between_ervas.h5` and outputs the archive `tms_betwe
 The complete pipeline can be ran using the command
 
 ```sh
-fin-traffic-complete_pipeline --begin-date <being_date> --end-date <end_date> --time-resolution <time-resolution> --aggregation_level <area> --results_dir_fetch <path/to/dir> --results_dir_aggregate <path/to/dir> --results_dir_traffic <path/to/dir>
+fin-traffic-complete_pipeline --begin-date <being_date> --end-date <end_date> \
+--time-resolution <time-resolution> --aggregation_level <area> \
+--results_dir_fetch <path/to/dir> \
+--results_dir_aggregate <path/to/dir> \
+--results_dir_traffic <path/to/dir>
 ```
 
 Example:
 
 ```sh
-fin-traffic-complete_pipeline --begin-date 2020-01-01 --end-date 2020-02-01 --time-resolution 1h --aggregation_level hcd --results_dir_fetch ~/Documents/foo/raw_data --results_dir_aggregate ~/Documents/foo/aggregate_time --results_dir_traffic ~/Documents/foo/aggregate_hcd
+fin-traffic-complete_pipeline --begin-date 2020-01-01 --end-date 2020-02-01 \
+--time-resolution 1h --aggregation_level hcd \
+--results_dir_fetch ~/Documents/foo/raw_data \
+--results_dir_aggregate ~/Documents/foo/aggregate_time \
+--results_dir_traffic ~/Documents/foo/aggregate_hcd
 ```
 
 ### Schedule a daily download of the data
@@ -111,7 +120,11 @@ We can also use a *schedule* to daily check for new data. What the *schedule* do
 
 Example:
 ```sh
-fin-traffic-schedule-complete_pipeline --begin-date 2020-01-01 --time-resolution 1h --aggregation_level hcd --results_dir_fetch ~/Documents/foo/raw_data --results_dir_aggregate ~/Documents/foo/aggregate_time --results_dir_traffic ~/Documents/foo/aggregate_hcd
+fin-traffic-schedule-complete_pipeline --begin-date 2020-01-01 \
+--time-resolution 1h --aggregation_level hcd \
+--results_dir_fetch ~/Documents/foo/raw_data \
+--results_dir_aggregate ~/Documents/foo/aggregate_time \
+--results_dir_traffic ~/Documents/foo/aggregate_hcd
 ```
 
 **N.B:** The script/command does not clean the old files. This can cause that there are old files with repeated data occupying disk space. The folders should be cleaned by hand or maybe later in the future implement a functionality to clean them automatically.
