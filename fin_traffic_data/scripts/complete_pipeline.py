@@ -36,6 +36,10 @@ def _parse_time_resolution(x):
 def determine_dates_to_fetch(logger, results_dir_traffic, aggregation_level,
                              begin_date, end_date):
     logger.info('Determining dates to fetch TMS information')
+    logger.debug(('Desired initial dates\n'
+                  'Being date: %s.\n'
+                  'End date: %s.') % (begin_date,
+                                      end_date))
     match_pattern = '%s/tms_between_%ss_input_*' % (results_dir_traffic,
                                                     aggregation_level)
     aggregation_files = glob.glob(match_pattern)

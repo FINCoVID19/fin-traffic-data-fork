@@ -54,6 +54,7 @@ setup(
             'fin-traffic-compute-traffic-between-areas = fin_traffic_data.scripts.get_aggregated_traffic_between_areas:main',
             'fin-traffic-export-traffic-between-areas-to-csv = fin_traffic_data.scripts.export_area_data_as_csv:main',
             'fin-traffic-complete_pipeline = fin_traffic_data.scripts.complete_pipeline:main',
+            'fin-traffic-schedule-complete_pipeline = fin_traffic_data.scripts.schedule_complete_pipeline:main'
         ]
     },
     install_requires=get_requirements(),
