@@ -6,22 +6,6 @@ import argparse
 import codecs
 import h5py
 import pandas as pd
-from enum import Enum, unique
-
-
-@unique
-class Area(Enum):
-    PROVINCE = "province"
-    ERVA = "erva"
-    HCD = "hcd"
-
-    def __str__(self):
-        if self is Area.PROVINCE:
-            return "province"
-        elif self is Area.ERVA:
-            return "erva"
-        else:
-            return "hcd"
 
 
 def export_area_data_as_csv(inputpath):

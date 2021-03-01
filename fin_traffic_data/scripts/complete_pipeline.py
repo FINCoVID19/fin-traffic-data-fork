@@ -78,23 +78,30 @@ def determine_dates_to_fetch(logger, results_dir_traffic, aggregation_level,
                                                latest_date))
 
     date_intervals = []
-    if begin_date < earliest_date:
+    if ((begin_date < earliest_date and end_date <= earliest_date) or
+       (begin_date >= latest_date and end_date > latest_date)):
+        begin_first_interval = begin_date
+        end_first_interval = end_date
+        date_intervals.append((begin_first_interval, end_first_interval))
+    elif begin_date < earliest_date and end_date <= latest_date:
         begin_first_interval = begin_date
         end_first_interval = earliest_date
         date_intervals.append((begin_first_interval, end_first_interval))
-        logger.info(('First interval\n'
-                     'Begin date: %s\n'
-                     'End date: %s') % (begin_first_interval,
-                                        end_first_interval))
+    elif begin_date >= earliest_date and end_date > latest_date:
+        begin_first_interval = latest_date
+        end_first_interval = end_date
+        date_intervals.append((begin_first_interval, end_first_interval))
+    elif begin_date < earliest_date and end_date > latest_date:
+        begin_first_interval = begin_date
+        end_first_interval = earliest_date
+        date_intervals.append((begin_first_interval, end_first_interval))
 
-    if end_date > latest_date:
         begin_second_interval = latest_date
         end_second_interval = end_date
         date_intervals.append((begin_second_interval, end_second_interval))
-        logger.info(('Second interval\n'
-                     'Begin date: %s\n'
-                     'End date: %s') % (begin_second_interval,
-                                        end_second_interval))
+
+    logger.info(('Determined intervals\n'
+                 '%s') % (date_intervals, ))
 
     return date_intervals
 
@@ -132,12 +139,12 @@ def complete_fetch_aggregate_process(logger, begin_date, end_date,
     logger.info('Data aggregated by time!')
 
     # Getting the latest file that was aggregated.
-    time_aggregated_files_match = glob.glob(results_dir_aggregate)
+    time_aggregated_files_match = glob.glob(results_dir_aggregate + "/*")
     latest_file_aggregate = max(time_aggregated_files_match, key=os.path.getctime)
     logger.info('Aggregating data by area\n'
                 'Time aggregated input file: %s\n'
                 'Aggregation level: %s\n'
-                'Visaluzation enabled?: %s'
+                'Visaluzation enabled?: %s\n'
                 'Results dir area aggregated: %s' % (latest_file_aggregate,
                                                      aggregation_level,
                                                      visualize_bool,
