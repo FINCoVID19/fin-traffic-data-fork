@@ -145,12 +145,12 @@ def fetch_tms_data_aggregate(logger, begin_date, end_date,
                     'Begin date: %s\n'
                     'End date: %s\n'
                     'Progressbar bool: %s\n'
-                    'Results dir fetch: %s' % (begin_date,
-                                               end_date,
+                    'Results dir fetch: %s' % (begin_date_interval,
+                                               end_date_interval,
                                                progressbar_bool,
                                                results_dir_fetch))
-        results_dir_fetch = fetch_raw_data(begin_date=begin_date,
-                                           end_date=end_date,
+        results_dir_fetch = fetch_raw_data(begin_date=begin_date_interval,
+                                           end_date=end_date_interval,
                                            progressbar_bool=progressbar_bool,
                                            results_dir=results_dir_fetch)
     logger.info('Raw data fetched!')
