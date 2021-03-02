@@ -55,55 +55,54 @@ def determine_dates_to_fetch(logger, results_dir_traffic, aggregation_level,
                      'Begin date: %s\n'
                      'End date: %s') % (begin_first_interval,
                                         end_first_interval))
-        return date_intervals
+    else:
+        earliest_date = datetime.datetime(year=2050, month=1, day=1).date()
+        latest_date = datetime.datetime(year=1970, month=1, day=1).date()
+        for file in aggregation_files:
+            logger.debug('Looking for dates in file: %s' % (file, ))
+            regex_match = re.match((r".*tms_between_hcds_input_.*(?P<begin_date>\d{4}-\d{2}-\d{2}).*"
+                                    r"(?P<end_date>\d{4}-\d{2}-\d{2}).*"), file)
+            if not regex_match:
+                logger.debug('File did not have a begin or end date: %s' % (file, ))
+                continue
 
-    earliest_date = datetime.datetime(year=2050, month=1, day=1).date()
-    latest_date = datetime.datetime(year=1970, month=1, day=1).date()
-    for file in aggregation_files:
-        logger.debug('Looking for dates in file: %s' % (file, ))
-        regex_match = re.match((r".*tms_between_hcds_input_.*(?P<begin_date>\d{4}-\d{2}-\d{2}).*"
-                                r"(?P<end_date>\d{4}-\d{2}-\d{2}).*"), file)
-        if not regex_match:
-            logger.debug('File did not have a begin or end date: %s' % (file, ))
-            continue
+            begin_date_file = datetime.datetime.strptime(regex_match.group('begin_date'),
+                                                         "%Y-%m-%d").date()
+            end_date_file = datetime.datetime.strptime(regex_match.group('end_date'),
+                                                       "%Y-%m-%d").date()
+            logger.debug('Begin date: %s. End date: %s.' % (begin_date_file, end_date_file))
+            if begin_date_file < earliest_date:
+                earliest_date = begin_date_file
 
-        begin_date_file = datetime.datetime.strptime(regex_match.group('begin_date'),
-                                                     "%Y-%m-%d").date()
-        end_date_file = datetime.datetime.strptime(regex_match.group('end_date'),
-                                                   "%Y-%m-%d").date()
-        logger.debug('Begin date: %s. End date: %s.' % (begin_date_file, end_date_file))
-        if begin_date_file < earliest_date:
-            earliest_date = begin_date_file
+            if end_date_file > latest_date:
+                latest_date = end_date_file
+        logger.debug(('Earliest date found: %s.\n'
+                      'Latest date found: %s.') % (earliest_date,
+                                                   latest_date))
 
-        if end_date_file > latest_date:
-            latest_date = end_date_file
-    logger.debug(('Earliest date found: %s.\n'
-                  'Latest date found: %s.') % (earliest_date,
-                                               latest_date))
+        if ((begin_date < earliest_date and end_date <= earliest_date) or
+           (begin_date >= latest_date and end_date > latest_date)):
+            begin_first_interval = begin_date
+            end_first_interval = end_date
+            date_intervals.append((begin_first_interval, end_first_interval))
+        elif begin_date < earliest_date and end_date <= latest_date:
+            begin_first_interval = begin_date
+            end_first_interval = earliest_date
+            date_intervals.append((begin_first_interval, end_first_interval))
+        elif begin_date >= earliest_date and end_date > latest_date:
+            begin_first_interval = latest_date
+            end_first_interval = end_date
+            date_intervals.append((begin_first_interval, end_first_interval))
+        elif begin_date < earliest_date and end_date > latest_date:
+            begin_first_interval = begin_date
+            end_first_interval = earliest_date
+            date_intervals.append((begin_first_interval, end_first_interval))
 
-    date_intervals = []
-    if ((begin_date < earliest_date and end_date <= earliest_date) or
-       (begin_date >= latest_date and end_date > latest_date)):
-        begin_first_interval = begin_date
-        end_first_interval = end_date
-        date_intervals.append((begin_first_interval, end_first_interval))
-    elif begin_date < earliest_date and end_date <= latest_date:
-        begin_first_interval = begin_date
-        end_first_interval = earliest_date
-        date_intervals.append((begin_first_interval, end_first_interval))
-    elif begin_date >= earliest_date and end_date > latest_date:
-        begin_first_interval = latest_date
-        end_first_interval = end_date
-        date_intervals.append((begin_first_interval, end_first_interval))
-    elif begin_date < earliest_date and end_date > latest_date:
-        begin_first_interval = begin_date
-        end_first_interval = earliest_date
-        date_intervals.append((begin_first_interval, end_first_interval))
+            begin_second_interval = latest_date
+            end_second_interval = end_date
+            date_intervals.append((begin_second_interval, end_second_interval))
 
-        begin_second_interval = latest_date
-        end_second_interval = end_date
-        date_intervals.append((begin_second_interval, end_second_interval))
-
+    logger.debug('Checking for large dates to do a batch of them')
     batched_intervals = []
     for begin_interval, end_interval in date_intervals:
         time_difference = end_interval - begin_interval
