@@ -104,31 +104,56 @@ def determine_dates_to_fetch(logger, results_dir_traffic, aggregation_level,
         end_second_interval = end_date
         date_intervals.append((begin_second_interval, end_second_interval))
 
+    batched_intervals = []
+    for begin_interval, end_interval in date_intervals:
+        time_difference = end_interval - begin_interval
+        if time_difference.days > 30:
+            begin_batch_interval = begin_interval
+            end_batch_interval = begin_interval + datetime.timedelta(days=30)
+            while True:
+                batched_intervals.append((begin_batch_interval, end_batch_interval))
+                if end_batch_interval == end_interval:
+                    break
+                else:
+                    begin_batch_interval = end_batch_interval
+                    end_batch_interval = end_batch_interval + datetime.timedelta(days=30)
+                    if end_batch_interval >= end_interval:
+                        end_batch_interval = end_interval
+        else:
+            batched_intervals.append((begin_interval, end_interval))
+
     logger.info(('Determined intervals\n'
-                 '%s') % (date_intervals, ))
+                 '%s') % (batched_intervals, ))
 
-    return date_intervals
+    return batched_intervals
 
 
-def complete_fetch_aggregate_process(logger, begin_date, end_date,
-                                     progressbar_bool, results_dir_fetch,
-                                     time_resolution, results_dir_aggregate,
-                                     aggregation_level, visualize_bool,
-                                     results_dir_traffic):
-    logger.info('Starting complete process of fetching new tms data.')
+def fetch_tms_data_aggregate(logger, begin_date, end_date,
+                             progressbar_bool, results_dir_fetch,
+                             time_resolution, results_dir_aggregate,
+                             aggregation_level, visualize_bool,
+                             results_dir_traffic):
+    logger.info('Starting to fetch all data and aggregate.')
+    date_intervals = determine_dates_to_fetch(logger=logger,
+                                              results_dir_traffic=results_dir_traffic,
+                                              aggregation_level=aggregation_level,
+                                              begin_date=begin_date,
+                                              end_date=end_date)
+    logger.info('Date intervals determined.')
 
-    logger.info('Fetching raw data\n'
-                'Begin date: %s\n'
-                'End date: %s\n'
-                'Progressbar bool: %s\n'
-                'Results dir fetch: %s' % (begin_date,
-                                           end_date,
-                                           progressbar_bool,
-                                           results_dir_fetch))
-    results_dir_fetch = fetch_raw_data(begin_date=begin_date,
-                                       end_date=end_date,
-                                       progressbar_bool=progressbar_bool,
-                                       results_dir=results_dir_fetch)
+    for begin_date_interval, end_date_interval in date_intervals:
+        logger.info('Fetching raw data\n'
+                    'Begin date: %s\n'
+                    'End date: %s\n'
+                    'Progressbar bool: %s\n'
+                    'Results dir fetch: %s' % (begin_date,
+                                               end_date,
+                                               progressbar_bool,
+                                               results_dir_fetch))
+        results_dir_fetch = fetch_raw_data(begin_date=begin_date,
+                                           end_date=end_date,
+                                           progressbar_bool=progressbar_bool,
+                                           results_dir=results_dir_fetch)
     logger.info('Raw data fetched!')
 
     logger.info('Aggregating data by time\n'
@@ -164,34 +189,9 @@ def complete_fetch_aggregate_process(logger, begin_date, end_date,
     result_tar_path = export_area_data_as_csv(inputpath=result_path_traffic)
     logger.info('Exported results in CSV!')
 
-    return result_tar_path
-
-
-def fetch_tms_data_aggregate(logger, begin_date, end_date,
-                             progressbar_bool, results_dir_fetch,
-                             time_resolution, results_dir_aggregate,
-                             aggregation_level, visualize_bool,
-                             results_dir_traffic):
-    logger.info('Starting to fetch all data and aggregate.')
-    date_intervals = determine_dates_to_fetch(logger=logger,
-                                              results_dir_traffic=results_dir_traffic,
-                                              aggregation_level=aggregation_level,
-                                              begin_date=begin_date,
-                                              end_date=end_date)
-    logger.info('Date intervals determined.')
-
-    for begin_date_interval, end_date_interval in date_intervals:
-        complete_fetch_aggregate_process(logger=logger,
-                                         begin_date=begin_date_interval,
-                                         end_date=end_date_interval,
-                                         progressbar_bool=False,
-                                         results_dir_fetch=results_dir_fetch,
-                                         time_resolution=time_resolution,
-                                         results_dir_aggregate=results_dir_aggregate,
-                                         aggregation_level=aggregation_level,
-                                         visualize_bool=False,
-                                         results_dir_traffic=results_dir_traffic)
     logger.info('Finished to execute complete process of fetching TMS data')
+
+    return result_tar_path
 
 
 # Parse script arguments
