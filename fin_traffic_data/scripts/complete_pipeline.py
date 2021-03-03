@@ -138,6 +138,10 @@ def fetch_tms_data_aggregate(logger, begin_date, end_date,
                                               end_date=end_date)
     logger.info('Date intervals determined.')
 
+    if len(date_intervals) == 0:
+        logger.info('No new date interval determined. Not doing anything.')
+        return
+
     for begin_date_interval, end_date_interval in date_intervals:
         logger.info('Fetching raw data\n'
                     'Begin date: %s\n'
