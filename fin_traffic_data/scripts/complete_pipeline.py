@@ -33,15 +33,14 @@ def _parse_time_resolution(x):
     return dt
 
 
-def determine_dates_to_fetch(logger, results_dir_traffic, aggregation_level,
+def determine_dates_to_fetch(logger, results_dir_fetch,
                              begin_date, end_date):
     logger.info('Determining dates to fetch TMS information')
     logger.debug(('Desired initial dates\n'
                   'Being date: %s.\n'
                   'End date: %s.') % (begin_date,
                                       end_date))
-    match_pattern = '%s/tms_between_%ss_input_*' % (results_dir_traffic,
-                                                    aggregation_level)
+    match_pattern = '%s/fin_traffic_raw_*' % (results_dir_fetch, )
     aggregation_files = glob.glob(match_pattern)
     logger.debug('Looking for dates in files with pattern: %s' % (match_pattern))
 
@@ -60,7 +59,7 @@ def determine_dates_to_fetch(logger, results_dir_traffic, aggregation_level,
         latest_date = datetime.datetime(year=1970, month=1, day=1).date()
         for file in aggregation_files:
             logger.debug('Looking for dates in file: %s' % (file, ))
-            regex_match = re.match((r".*tms_between_hcds_input_.*(?P<begin_date>\d{4}-\d{2}-\d{2}).*"
+            regex_match = re.match((r".*fin_traffic_raw_.*(?P<begin_date>\d{4}-\d{2}-\d{2}).*"
                                     r"(?P<end_date>\d{4}-\d{2}-\d{2}).*"), file)
             if not regex_match:
                 logger.debug('File did not have a begin or end date: %s' % (file, ))
@@ -134,8 +133,7 @@ def fetch_tms_data_aggregate(logger, begin_date, end_date,
                              results_dir_traffic):
     logger.info('Starting to fetch all data and aggregate.')
     date_intervals = determine_dates_to_fetch(logger=logger,
-                                              results_dir_traffic=results_dir_traffic,
-                                              aggregation_level=aggregation_level,
+                                              results_dir_fetch=results_dir_fetch,
                                               begin_date=begin_date,
                                               end_date=end_date)
     logger.info('Date intervals determined.')
