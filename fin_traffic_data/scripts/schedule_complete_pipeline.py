@@ -34,6 +34,7 @@ def schedule_complete_pipeline(logger, begin_date, results_dir_fetch,
                                aggregation_level, results_dir_traffic):
     while True:
         now_time = datetime.datetime.now()
+        logger.info('Current time: %s' % (now_time, ))
         if now_time.hour > 12:
             start_execution = time.time()
             fetch_tms_data_aggregate(logger=logger,
