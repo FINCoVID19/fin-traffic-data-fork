@@ -101,7 +101,7 @@ def parse_args(args=sys.argv[1:]):
                         help="Name of the log file of the main process.")
 
     parser.add_argument("--loglevel", "-ll", type=str,
-                        default="DEBUG",
+                        default="INFO",
                         choices=["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"],
                         help="Set logging level.")
 

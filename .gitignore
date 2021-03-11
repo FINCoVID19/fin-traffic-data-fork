@@ -2,6 +2,7 @@
 *.h5
 *.bz2
 tms_between_hcds
+*.sh
 
 # Ignore MAC files
 .DS_Store
