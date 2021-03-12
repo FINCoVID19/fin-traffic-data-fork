@@ -94,7 +94,7 @@ def parse_args(args=sys.argv[1:]):
                         help="Whether to collect erva or province or hcd-level data.")
     parser.add_argument("--results_dir", "-rd",
                         type=str,
-                        default='aggregated_data_hcd',
+                        default='aggregated_data_area',
                         help="Name of the directory to store the results.")
 
     return parser.parse_args(args)

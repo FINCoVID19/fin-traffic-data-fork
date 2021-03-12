@@ -49,8 +49,8 @@ def schedule_complete_pipeline(logger, begin_date, results_dir_fetch,
                                      results_dir_traffic=results_dir_traffic)
             elapsed_execution = start_execution - time.time()
             elapsed_delta = datetime.timedelta(seconds=elapsed_execution)
-            logger.info('Total elapsed time of execution: %s' % (elapsed_delta, ))
-            logger.info('Checked if new data download needed. Sleeping for 1 hour.')
+            logger.info(('Sleeping for 1 hour.'
+                         ' Total elapsed time of execution: %s') % (elapsed_delta, ))
             time.sleep(3600)
         else:
             logger.info('Still not 12 pm. Sleeping for 1 hour.')
@@ -92,7 +92,7 @@ def parse_args(args=sys.argv[1:]):
 
     parser.add_argument("--results_dir_traffic", "-rt",
                         type=str,
-                        default='aggregated_data_hcd',
+                        default='aggregated_data_area',
                         help="Name of the directory to store the aggregated data by area.")
 
     # Arguments for logging

@@ -71,7 +71,7 @@ def parse_args(args=sys.argv[1:]):
 
     parser.add_argument("--results_dir", "-rd",
                         type=str,
-                        default='aggregated_data',
+                        default='aggregated_data_time',
                         help="Name of the directory to store the results.")
 
     return parser.parse_args(args)
