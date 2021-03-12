@@ -133,7 +133,7 @@ def get_time_aggregation_file(logger, results_dir_aggregate, begin_date, end_dat
     logger.debug('Looking for dates in files with pattern: %s' % (match_pattern))
 
     if len(aggregation_files) == 0:
-        logger.debug('No files with the pattern were found.')
+        logger.info('No files with the pattern were found.')
         return None
     else:
         for file in aggregation_files:
@@ -150,23 +150,23 @@ def get_time_aggregation_file(logger, results_dir_aggregate, begin_date, end_dat
                                                        "%Y-%m-%d").date()
             logger.debug('Begin date: %s. End date: %s.' % (begin_date_file, end_date_file))
             if begin_date_file == begin_date and end_date_file == end_date:
-                logger.debug('File had the same begin and end date!')
+                logger.info('File found! Had the same begin and end date!')
                 return file
 
-    logger.debug('No time aggregated files were found.')
+    logger.info('No time aggregated files were found.')
     return None
 
 
 def get_area_aggregation_file(logger, results_dir_traffic, begin_date, end_date,
                               aggregation_level):
-    logger.info('Checking for existent area aggregated files.')
+    logger.info('Checking for existent area aggregated files. Level: %s' % (aggregation_level))
     match_pattern = '%s/tms_between_*' % (results_dir_traffic, )
     aggregation_files = glob.glob(match_pattern)
     logger.debug('Looking for dates in files with pattern: %s' % (match_pattern))
     comp_aggregation_level = aggregation_level + "s"
 
     if len(aggregation_files) == 0:
-        logger.debug('No files with the pattern were found.')
+        logger.info('No files with the pattern were found.')
         return None
     else:
         for file in aggregation_files:
@@ -189,10 +189,10 @@ def get_area_aggregation_file(logger, results_dir_traffic, begin_date, end_date,
                                                                      area))
             if (begin_date_file == begin_date and end_date_file == end_date
                and area == comp_aggregation_level):
-                logger.debug('File had the same begin, end date and area!')
+                logger.info('Found file! Had the same begin, end date and area!')
                 return file
 
-    logger.debug('No time aggregated files were found.')
+    logger.info('No time aggregated files were found.')
     return None
 
 
@@ -242,45 +242,52 @@ def fetch_tms_data_aggregate(logger, begin_date, end_date,
                                                    results_dir=results_dir_aggregate)
         logger.info('Data aggregated by time!')
     else:
-        logger.info('Found file with already aggregated data!')
+        logger.info('Found file with already aggregated data: %s' % (time_aggregated_file, ))
 
     time_aggregated_file = get_time_aggregation_file(logger=logger,
                                                      results_dir_aggregate=results_dir_aggregate,
                                                      begin_date=begin_date,
                                                      end_date=end_date)
     if time_aggregated_file is not None:
-        result_path_traffic = get_area_aggregation_file(logger=logger,
-                                                        results_dir_traffic=results_dir_traffic,
-                                                        begin_date=begin_date,
-                                                        end_date=end_date,
-                                                        aggregation_level=aggregation_level)
-        if result_path_traffic is None:
-            logger.info('Aggregating data by area\n'
-                        'Time aggregated input file: %s\n'
-                        'Aggregation level: %s\n'
-                        'Visaluzation enabled?: %s\n'
-                        'Results dir area aggregated: %s' % (time_aggregated_file,
-                                                             aggregation_level,
-                                                             visualize_bool,
-                                                             results_dir_traffic))
-            result_path_traffic = get_aggregated_traffic_between_areas(inputfile=time_aggregated_file,
-                                                                       area=aggregation_level,
-                                                                       visualization_enabled=visualize_bool,
-                                                                       results_dir=results_dir_traffic)
-            logger.info('Data aggregated by area!')
+        # If all constructing a list with all levels
+        if aggregation_level == "all":
+            aggregation_list = ["province", "erva", "hcd"]
         else:
-            logger.info('Data aggregated by area file found!')
+            aggregation_list = [aggregation_level]
 
-        result_tar_path = result_path_traffic.split('.')[0] + ".tar.bz2"
-        if os.path.isfile(result_tar_path):
-            logger.info('Compressed file already found: %s' % (result_tar_path))
-        else:
-            logger.info('Exporting results as CSV'
-                        'Exporting results in file: %s' % (result_path_traffic, ))
-            result_tar_path = export_area_data_as_csv(inputpath=result_path_traffic)
-            logger.info('Exported results in CSV!')
+        for aggregation_area in aggregation_list:
+            result_path_traffic = get_area_aggregation_file(logger=logger,
+                                                            results_dir_traffic=results_dir_traffic,
+                                                            begin_date=begin_date,
+                                                            end_date=end_date,
+                                                            aggregation_level=aggregation_area)
+            if result_path_traffic is None:
+                logger.info('Aggregating data by area\n'
+                            'Time aggregated input file: %s\n'
+                            'Aggregation level: %s\n'
+                            'Visaluzation enabled?: %s\n'
+                            'Results dir area aggregated: %s' % (time_aggregated_file,
+                                                                 aggregation_area,
+                                                                 visualize_bool,
+                                                                 results_dir_traffic))
+                result_path_traffic = get_aggregated_traffic_between_areas(inputfile=time_aggregated_file,
+                                                                           area=aggregation_area,
+                                                                           visualization_enabled=visualize_bool,
+                                                                           results_dir=results_dir_traffic)
+                logger.info('Data aggregated by area!')
+            else:
+                logger.info('Data aggregated by area file found: %s' % (result_path_traffic, ))
 
-            logger.info('Finished to execute complete process of fetching TMS data')
+            result_tar_path = result_path_traffic.split('.')[0] + ".tar.bz2"
+            if os.path.isfile(result_tar_path):
+                logger.info('Compressed file already found: %s' % (result_tar_path))
+            else:
+                logger.info('Exporting results as CSV'
+                            'Exporting results in file: %s' % (result_path_traffic, ))
+                result_tar_path = export_area_data_as_csv(inputpath=result_path_traffic)
+                logger.info('Exported results in CSV!')
+
+                logger.info('Finished to execute complete process of fetching TMS data')
 
         return result_tar_path
     else:
@@ -308,7 +315,7 @@ def parse_args(args=sys.argv[1:]):
     parser.add_argument("--aggregation_level", "-al",
                         type=str,
                         default="hcd",
-                        choices=["province", "erva", "hcd"],
+                        choices=["province", "erva", "hcd", "all"],
                         help="Set the area aggregation level.")
 
     parser.add_argument("--time-resolution",

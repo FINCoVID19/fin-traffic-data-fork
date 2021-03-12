@@ -72,7 +72,7 @@ def parse_args(args=sys.argv[1:]):
     parser.add_argument("--aggregation_level", "-al",
                         type=str,
                         default="hcd",
-                        choices=["province", "erva", "hcd"],
+                        choices=["province", "erva", "hcd", "all"],
                         help="Set the area aggregation level.")
 
     parser.add_argument("--time-resolution",
