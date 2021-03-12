@@ -328,7 +328,7 @@ def parse_args(args=sys.argv[1:]):
 
     parser.add_argument("--results_dir_traffic", "-rt",
                         type=str,
-                        default='aggregated_data_hcd',
+                        default='aggregated_data_area',
                         help="Name of the directory to store the aggregated data by area.")
 
     # Arguments for logging
